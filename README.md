@@ -1,4 +1,4 @@
-![Lucerna — a living workspace for understanding](assets/lucerna-avatar.png)
+![Lucerna: A living workspace for understanding. An illuminated book connects scientific models and imagined worlds.](assets/lucerna-avatar.png)
 
 # Lucerna
 
@@ -6,7 +6,7 @@
 
 Ask a question, bring a paper, or start a longer learning goal. Your agent can connect new ideas to what you already understand, remember useful bridges and unfinished questions, and revise the route as you learn. You can inspect, correct, or erase what it remembers.
 
-[Explore Lucerna](https://stunspot.github.io/lucerna/) · [Download v0.3.0](dist/Lucerna-v0.3.0.zip) · [Installation guide](lucerna/INSTALL.md)
+[Explore Lucerna](https://stunspot.github.io/lucerna/) · [Download v0.3.0](https://github.com/Stunspot/lucerna/raw/refs/heads/main/dist/Lucerna-v0.3.0.zip) · [Installation guide](lucerna/INSTALL.md)
 
 ## What you can do
 
@@ -20,10 +20,13 @@ Ask a question, bring a paper, or start a longer learning goal. Your agent can c
 
 ## Get started
 
-Download the ZIP above and install the complete `lucerna` folder as a skill in a host that can read skills, run commands, and open a browser. Lucerna needs Python 3.10 or newer. Follow the [installation guide](lucerna/INSTALL.md), then ask your agent:
+1. [Download Lucerna v0.3.0](https://github.com/Stunspot/lucerna/raw/refs/heads/main/dist/Lucerna-v0.3.0.zip). Extract it and keep the complete `lucerna` folder together.
+2. Install that folder as a skill in an AI host that can read local skills and run Python 3.10 or newer. Follow the [installation guide](lucerna/INSTALL.md) for the exact folder location and commands.
+3. Ask your agent: “Use $lucerna. Help me start a learning workspace and explain something I have been trying to understand.” Choose a data folder you can find again. Your agent should open the local Paper Explorer and show the four included labs.
 
-> Use $lucerna. Help me start a learning workspace and explain something I have been trying to understand.
+Bring your own question or source when you are ready. **Add source** imports a document into the browser library; ask your agent to explore it when you want a source-linked explanation and interactive scenes. **Save question** holds a browser question for the agent to pick up. The browser does not write new explanations on its own.
 
-Lucerna is free. It needs no separate model API key; your AI host's usual model and tool costs still apply. Your learner data stays in the workspace you choose. See the [package README](lucerna/README.md) for runtime details and limits, and the [third-party notices](lucerna/THIRD-PARTY-NOTICES.md) for bundled dependencies.
-
+Lucerna is free. It needs no separate model API key; your AI host's usual model and tool costs still apply. Your learning data stays in the workspace you choose. The [package README](lucerna/README.md) covers the full workflow and limits; [third-party notices](lucerna/THIRD-PARTY-NOTICES.md) cover bundled dependencies.
 [Collaborative Dynamics](https://collaborative-dynamics.com/) · [Support on Discord](https://discord.gg/stunspot)
+
+
