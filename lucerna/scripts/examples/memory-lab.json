@@ -1,0 +1,2117 @@
+{
+  "schema_version": 1,
+  "title": "Memory that keeps its meaning",
+  "document_id": "lesson-memory-instrument",
+  "overview": "Keep the meaning. Change the consumer. Follow the bill.",
+  "scenes": [
+    {
+      "id": "meaning-survives",
+      "title": "A memory can keep every fact and still lose the answer",
+      "section_id": "memory-1",
+      "source_anchors": [
+        {
+          "block_id": "memory-evidence-1",
+          "relation": "illustrates"
+        },
+        {
+          "block_id": "memory-evidence-1-limits",
+          "relation": "supports"
+        }
+      ],
+      "explanation": "Two statements can survive storage while the relation between them disappears. In this invented learner vignette, a general preference for diagrams has a later, exam-only exception that takes effect on April 10. Move the date and change the task. Then remove the effective date, scope or exception relationship one at a time. The bright borders show the applicability implied by those retained fields; the bottom line follows the complete original chronology. This is an inspectable demonstration of the distinction, not a simulation of how an LLM would answer. Appendix D.1 supplies the empirical motivation: in thirteen questions where the verbatim store succeeded and the curated store failed, the decisive fact was still present. The authors traced failures to lost temporal status, affect and narrative connections. Our date-and-context example illustrates part of that problem.",
+      "narration": "Two statements can survive storage while the relation between them disappears. In this invented learner vignette, a general preference for diagrams has a later, exam-only exception that takes effect on April 10. Move the date and change the task. Then remove the effective date, scope or exception relationship one at a time. The bright borders show the applicability implied by those retained fields; the bottom line follows the complete original chronology. This is an inspectable demonstration of the distinction, not a simulation of how an LLM would answer. Appendix D.1 supplies the empirical motivation: in thirteen questions where the verbatim store succeeded and the curated store failed, the decisive fact was still present. The authors traced failures to lost temporal status, affect and narrative connections. Our date-and-context example illustrates part of that problem.",
+      "alt_text": "Two statements can survive storage while the relation between them disappears. In this invented learner vignette, a general preference for diagrams has a later, exam-only exception that takes effect on April 10. Move the date and change the task. Then remove the effective date, scope or exception relationship one at a time. The bright borders show the applicability implied by those retained fields; the bottom line follows the complete original chronology. This is an inspectable demonstration of the distinction, not a simulation of how an LLM would answer. Appendix D.1 supplies the empirical motivation: in thirteen questions where the verbatim store succeeded and the curated store failed, the decisive fact was still present. The authors traced failures to lost temporal status, affect and narrative connections. Our date-and-context example illustrates part of that problem. All chart values and the causal readouts are also available as text.",
+      "duration": 20,
+      "controls": [
+        {
+          "id": "day",
+          "label": "Current day in April (original illustration)",
+          "type": "range",
+          "min": 1,
+          "max": 14,
+          "step": 1,
+          "default": 8
+        },
+        {
+          "id": "exam",
+          "label": "The current task is exam revision",
+          "type": "toggle",
+          "default": 1
+        },
+        {
+          "id": "keep_time",
+          "label": "Retain the April 10 effective date",
+          "type": "toggle",
+          "default": 1
+        },
+        {
+          "id": "keep_scope",
+          "label": "Retain the exam-only scope",
+          "type": "toggle",
+          "default": 1
+        },
+        {
+          "id": "keep_relation",
+          "label": "Retain the explicit exception relationship",
+          "type": "toggle",
+          "default": 1
+        }
+      ],
+      "variables": {
+        "effective": {
+          "op": "clamp",
+          "args": [
+            {
+              "op": "sub",
+              "args": [
+                {
+                  "var": "day"
+                },
+                9
+              ]
+            },
+            0,
+            1
+          ]
+        },
+        "time_gate": {
+          "op": "add",
+          "args": [
+            1,
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "sub",
+                  "args": [
+                    {
+                      "var": "effective"
+                    },
+                    1
+                  ]
+                },
+                {
+                  "var": "keep_time"
+                }
+              ]
+            }
+          ]
+        },
+        "scope_gate": {
+          "op": "add",
+          "args": [
+            1,
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "sub",
+                  "args": [
+                    {
+                      "var": "exam"
+                    },
+                    1
+                  ]
+                },
+                {
+                  "var": "keep_scope"
+                }
+              ]
+            }
+          ]
+        },
+        "exception_appears": {
+          "op": "mul",
+          "args": [
+            {
+              "var": "time_gate"
+            },
+            {
+              "var": "scope_gate"
+            }
+          ]
+        },
+        "baseline_appears": {
+          "op": "sub",
+          "args": [
+            1,
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "var": "exception_appears"
+                },
+                {
+                  "var": "keep_relation"
+                }
+              ]
+            }
+          ]
+        },
+        "ambiguous": {
+          "op": "mul",
+          "args": [
+            {
+              "var": "exception_appears"
+            },
+            {
+              "op": "sub",
+              "args": [
+                1,
+                {
+                  "var": "keep_relation"
+                }
+              ]
+            }
+          ]
+        },
+        "expected_equations": {
+          "op": "mul",
+          "args": [
+            {
+              "var": "effective"
+            },
+            {
+              "var": "exam"
+            }
+          ]
+        },
+        "expected_diagrams": {
+          "op": "sub",
+          "args": [
+            1,
+            {
+              "var": "expected_equations"
+            }
+          ]
+        }
+      },
+      "presets": [
+        {
+          "id": "before",
+          "title": "Before the exception starts",
+          "parameters": {
+            "day": 8,
+            "exam": 1,
+            "keep_time": 1,
+            "keep_scope": 1,
+            "keep_relation": 1
+          },
+          "description": ""
+        },
+        {
+          "id": "after",
+          "title": "After the exception starts",
+          "parameters": {
+            "day": 11,
+            "exam": 1,
+            "keep_time": 1,
+            "keep_scope": 1,
+            "keep_relation": 1
+          },
+          "description": ""
+        },
+        {
+          "id": "time_lost",
+          "title": "The effective date was lost",
+          "parameters": {
+            "day": 8,
+            "exam": 1,
+            "keep_time": 0,
+            "keep_scope": 1,
+            "keep_relation": 1
+          },
+          "description": ""
+        },
+        {
+          "id": "scope_lost",
+          "title": "The scope was lost",
+          "parameters": {
+            "day": 11,
+            "exam": 0,
+            "keep_time": 1,
+            "keep_scope": 0,
+            "keep_relation": 1
+          },
+          "description": ""
+        },
+        {
+          "id": "relation_lost",
+          "title": "The relationship was lost",
+          "parameters": {
+            "day": 11,
+            "exam": 1,
+            "keep_time": 1,
+            "keep_scope": 1,
+            "keep_relation": 0
+          },
+          "description": ""
+        }
+      ],
+      "visual": {
+        "width": 900,
+        "height": 540,
+        "objects": [
+          {
+            "id": "eyebrow",
+            "type": "text",
+            "x": 44,
+            "y": 40,
+            "text": "01  /  KEEP THE MEANING, NOT JUST THE WORDS",
+            "font_size": 16,
+            "fill": "#efd09a"
+          },
+          {
+            "id": "question",
+            "type": "text",
+            "x": 44,
+            "y": 80,
+            "text": "What should guide this lesson today?",
+            "font_size": 28,
+            "fill": "#f6f1e7"
+          },
+          {
+            "id": "synthetic",
+            "type": "text",
+            "x": 44,
+            "y": 111,
+            "text": "Original synthetic vignette · deterministic illustration, no model is being run",
+            "font_size": 16,
+            "fill": "#acbcc7"
+          },
+          {
+            "id": "timeline",
+            "type": "line",
+            "x1": 85,
+            "y1": 162,
+            "x2": 815,
+            "y2": 162,
+            "stroke": "#354853",
+            "stroke_width": 3
+          },
+          {
+            "id": "day1",
+            "type": "text",
+            "x": 63,
+            "y": 143,
+            "text": "APR 1",
+            "font_size": 15,
+            "fill": "#acbcc7"
+          },
+          {
+            "id": "day4",
+            "type": "text",
+            "x": 235,
+            "y": 143,
+            "text": "APR 4",
+            "font_size": 15,
+            "fill": "#acbcc7"
+          },
+          {
+            "id": "day10",
+            "type": "text",
+            "x": 565,
+            "y": 143,
+            "text": "APR 10",
+            "font_size": 15,
+            "fill": "#efd09a"
+          },
+          {
+            "id": "day14",
+            "type": "text",
+            "x": 788,
+            "y": 143,
+            "text": "APR 14",
+            "font_size": 15,
+            "fill": "#acbcc7"
+          },
+          {
+            "id": "today",
+            "type": "circle",
+            "cx": {
+              "op": "add",
+              "args": [
+                85,
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "div",
+                      "args": [
+                        {
+                          "op": "sub",
+                          "args": [
+                            {
+                              "var": "day"
+                            },
+                            1
+                          ]
+                        },
+                        13
+                      ]
+                    },
+                    730
+                  ]
+                }
+              ]
+            },
+            "cy": 162,
+            "r": 7,
+            "fill": "#90d4e7"
+          },
+          {
+            "id": "currentday",
+            "type": "text",
+            "x": 44,
+            "y": 202,
+            "text": "Today: April {{day:0}}",
+            "font_size": 19,
+            "fill": "#90d4e7"
+          },
+          {
+            "id": "revisiontask",
+            "type": "text",
+            "x": 340,
+            "y": 202,
+            "text": "Task: exam revision",
+            "font_size": 19,
+            "fill": "#90d4e7",
+            "opacity": {
+              "var": "exam"
+            }
+          },
+          {
+            "id": "newtask",
+            "type": "text",
+            "x": 340,
+            "y": 202,
+            "text": "Task: starting a new topic",
+            "font_size": 19,
+            "fill": "#90d4e7",
+            "opacity": {
+              "op": "sub",
+              "args": [
+                1,
+                {
+                  "var": "exam"
+                }
+              ]
+            }
+          },
+          {
+            "id": "baseline",
+            "type": "rect",
+            "x": 44,
+            "y": 231,
+            "width": 386,
+            "height": 142,
+            "rx": 12,
+            "fill": "#15252f",
+            "stroke": "#90d4e7",
+            "stroke_width": {
+              "op": "add",
+              "args": [
+                1,
+                {
+                  "op": "mul",
+                  "args": [
+                    3,
+                    {
+                      "var": "baseline_appears"
+                    }
+                  ]
+                }
+              ]
+            },
+            "reveal": {
+              "title": "The usual preference",
+              "text": "Invented April 1 observation: diagrams help this learner begin a new topic. Keep the original observation; a later exception need not erase its usefulness.",
+              "block_id": "memory-evidence-1"
+            }
+          },
+          {
+            "id": "baselineheading",
+            "type": "text",
+            "x": 63,
+            "y": 265,
+            "text": "USUAL STARTING POINT",
+            "font_size": 16,
+            "fill": "#90d4e7"
+          },
+          {
+            "id": "baselinephrase",
+            "type": "text",
+            "x": 63,
+            "y": 300,
+            "text": "Begin with a diagram.",
+            "font_size": 24,
+            "fill": "#f6f1e7"
+          },
+          {
+            "id": "baselinehint",
+            "type": "text",
+            "x": 63,
+            "y": 336,
+            "text": "Recorded April 1 · general preference",
+            "font_size": 16,
+            "fill": "#acbcc7"
+          },
+          {
+            "id": "exception",
+            "type": "rect",
+            "x": 470,
+            "y": 231,
+            "width": 386,
+            "height": 142,
+            "rx": 12,
+            "fill": "#15252f",
+            "stroke": "#efd09a",
+            "stroke_width": {
+              "op": "add",
+              "args": [
+                1,
+                {
+                  "op": "mul",
+                  "args": [
+                    3,
+                    {
+                      "var": "exception_appears"
+                    }
+                  ]
+                }
+              ]
+            },
+            "reveal": {
+              "title": "The later exception",
+              "text": "Invented April 4 observation: use worked equations for exam revision, effective April 10. The recording date, effective date, scope and exception relationship do different jobs.",
+              "block_id": "memory-evidence-1"
+            }
+          },
+          {
+            "id": "exceptionheading",
+            "type": "text",
+            "x": 489,
+            "y": 265,
+            "text": "CONTEXTUAL EXCEPTION",
+            "font_size": 16,
+            "fill": "#efd09a"
+          },
+          {
+            "id": "exceptionphrase",
+            "type": "text",
+            "x": 489,
+            "y": 300,
+            "text": "Use worked equations.",
+            "font_size": 24,
+            "fill": "#f6f1e7"
+          },
+          {
+            "id": "exceptionhint",
+            "type": "text",
+            "x": 489,
+            "y": 336,
+            "text": "Recorded April 4 · exams · from April 10",
+            "font_size": 16,
+            "fill": "#acbcc7"
+          },
+          {
+            "id": "connect",
+            "type": "line",
+            "x1": 430,
+            "y1": 302,
+            "x2": 470,
+            "y2": 302,
+            "stroke": "#efd09a",
+            "opacity": {
+              "var": "keep_relation"
+            },
+            "stroke_width": 3
+          },
+          {
+            "id": "apparent",
+            "type": "text",
+            "x": 44,
+            "y": 408,
+            "text": "Bright borders show what the retained view makes look applicable.",
+            "font_size": 16,
+            "fill": "#acbcc7"
+          },
+          {
+            "id": "ambiguouslabel",
+            "type": "text",
+            "x": 44,
+            "y": 443,
+            "text": "Both look current when their exception relationship is lost.",
+            "font_size": 19,
+            "fill": "#ed9c97",
+            "opacity": {
+              "var": "ambiguous"
+            }
+          },
+          {
+            "id": "expectedlabel",
+            "type": "text",
+            "x": 44,
+            "y": 486,
+            "text": "From the original chronology:",
+            "font_size": 18,
+            "fill": "#acbcc7"
+          },
+          {
+            "id": "expectdiagram",
+            "type": "text",
+            "x": 310,
+            "y": 486,
+            "text": "start with the diagram",
+            "font_size": 22,
+            "fill": "#90d4e7",
+            "opacity": {
+              "var": "expected_diagrams"
+            }
+          },
+          {
+            "id": "expectequation",
+            "type": "text",
+            "x": 310,
+            "y": 486,
+            "text": "use worked equations",
+            "font_size": 22,
+            "fill": "#efd09a",
+            "opacity": {
+              "var": "expected_equations"
+            }
+          },
+          {
+            "id": "experimenthint",
+            "type": "text",
+            "x": 44,
+            "y": 520,
+            "text": "Try a preset, then restore one missing link. The source facts never disappear.",
+            "font_size": 16,
+            "fill": "#acbcc7"
+          }
+        ],
+        "keyframes": [
+          {
+            "time": 0,
+            "object_id": "baseline",
+            "props": {
+              "opacity": 0.55
+            }
+          },
+          {
+            "time": 0.25,
+            "object_id": "baseline",
+            "props": {
+              "opacity": 1
+            }
+          },
+          {
+            "time": 0,
+            "object_id": "exception",
+            "props": {
+              "opacity": 0.35
+            }
+          },
+          {
+            "time": 0.5,
+            "object_id": "exception",
+            "props": {
+              "opacity": 1
+            }
+          }
+        ]
+      },
+      "steps": [
+        {
+          "time": 0,
+          "title": "Two observations, not one flat preference",
+          "text": "The later statement is recorded before it takes effect and applies to one task."
+        },
+        {
+          "time": 0.32,
+          "title": "Ask what applies now",
+          "text": "April 10 is an effective date. Exam revision is a context. Neither is just decoration on the text."
+        },
+        {
+          "time": 0.67,
+          "title": "Now remove a link",
+          "text": "Preserving both sentences does not preserve their operative relationship. Restore the missing field to recover it."
+        }
+      ],
+      "assumptions": [
+        "The person, dates, preferences and applicability rules in this scene are original synthetic teaching material, not observations from the paper or a real learner.",
+        "The controls operate an explicitly authored rule illustration; this does not run an agent, measure memory accuracy, or prove Lucerna's teaching effectiveness.",
+        "Appendix D.1 studies three PersonaMem 32k conversations and 32 questions; its diagnosis is evidence about those runs, not a universal claim that curation always damages memory.",
+        "Contextual qualification is not global supersession. This example keeps the diagram preference useful outside exam revision."
+      ]
+    },
+    {
+      "id": "memory-consumer",
+      "title": "The best memory view depends on who consumes it",
+      "section_id": "memory-2",
+      "source_anchors": [
+        {
+          "block_id": "memory-evidence-2",
+          "relation": "illustrates"
+        },
+        {
+          "block_id": "memory-evidence-2-limits",
+          "relation": "supports"
+        }
+      ],
+      "explanation": "Switch between the two execution-agent tiers and compare all five memory variants. With gpt-4.1, the episode log has the highest observed success rate: 87.1%, versus 82.1% for task-specific guidance synthesis. That seven-task paired advantage has p approximately .23, so the reverse ordering is not settled. With gpt-4.1-mini, guidance synthesis reaches 76.4%, versus the log's 66.4%; the fourteen-task paired advantage has p approximately .02. The useful question is whether a particular consumer can turn the supplied experience into the right next action. More curation is not automatically better: the non-GS skills-and-memory variant sits at 55.0% under the weaker executor. Click a bar to inspect what that variant actually supplies.",
+      "narration": "Switch between the two execution-agent tiers and compare all five memory variants. With gpt-4.1, the episode log has the highest observed success rate: 87.1%, versus 82.1% for task-specific guidance synthesis. That seven-task paired advantage has p approximately .23, so the reverse ordering is not settled. With gpt-4.1-mini, guidance synthesis reaches 76.4%, versus the log's 66.4%; the fourteen-task paired advantage has p approximately .02. The useful question is whether a particular consumer can turn the supplied experience into the right next action. More curation is not automatically better: the non-GS skills-and-memory variant sits at 55.0% under the weaker executor. Click a bar to inspect what that variant actually supplies.",
+      "alt_text": "Switch between the two execution-agent tiers and compare all five memory variants. With gpt-4.1, the episode log has the highest observed success rate: 87.1%, versus 82.1% for task-specific guidance synthesis. That seven-task paired advantage has p approximately .23, so the reverse ordering is not settled. With gpt-4.1-mini, guidance synthesis reaches 76.4%, versus the log's 66.4%; the fourteen-task paired advantage has p approximately .02. The useful question is whether a particular consumer can turn the supplied experience into the right next action. More curation is not automatically better: the non-GS skills-and-memory variant sits at 55.0% under the weaker executor. Click a bar to inspect what that variant actually supplies. All chart values and the causal readouts are also available as text.",
+      "duration": 18,
+      "controls": [
+        {
+          "id": "executor",
+          "label": "Execution agent in the reported experiment",
+          "type": "select",
+          "default": 1,
+          "options": [
+            {
+              "label": "Stronger · gpt-4.1",
+              "value": 0
+            },
+            {
+              "label": "Weaker · gpt-4.1-mini",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "variables": {
+        "score0": {
+          "op": "add",
+          "args": [
+            73.6,
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "sub",
+                  "args": [
+                    52.9,
+                    73.6
+                  ]
+                },
+                {
+                  "var": "executor"
+                }
+              ]
+            }
+          ]
+        },
+        "score1": {
+          "op": "add",
+          "args": [
+            87.1,
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "sub",
+                  "args": [
+                    66.4,
+                    87.1
+                  ]
+                },
+                {
+                  "var": "executor"
+                }
+              ]
+            }
+          ]
+        },
+        "score2": {
+          "op": "add",
+          "args": [
+            80.7,
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "sub",
+                  "args": [
+                    65.7,
+                    80.7
+                  ]
+                },
+                {
+                  "var": "executor"
+                }
+              ]
+            }
+          ]
+        },
+        "score3": {
+          "op": "add",
+          "args": [
+            75.7,
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "sub",
+                  "args": [
+                    55.0,
+                    75.7
+                  ]
+                },
+                {
+                  "var": "executor"
+                }
+              ]
+            }
+          ]
+        },
+        "score4": {
+          "op": "add",
+          "args": [
+            82.1,
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "sub",
+                  "args": [
+                    76.4,
+                    82.1
+                  ]
+                },
+                {
+                  "var": "executor"
+                }
+              ]
+            }
+          ]
+        },
+        "log_minus_gs": {
+          "op": "sub",
+          "args": [
+            {
+              "var": "score1"
+            },
+            {
+              "var": "score4"
+            }
+          ]
+        }
+      },
+      "presets": [
+        {
+          "id": "weaker",
+          "title": "A consumer that needs more help",
+          "parameters": {
+            "executor": 1
+          },
+          "description": ""
+        },
+        {
+          "id": "stronger",
+          "title": "A stronger consumer",
+          "parameters": {
+            "executor": 0
+          },
+          "description": ""
+        }
+      ],
+      "visual": {
+        "width": 900,
+        "height": 540,
+        "objects": [
+          {
+            "id": "eyebrow",
+            "type": "text",
+            "x": 44,
+            "y": 40,
+            "text": "02  /  WHO HAS TO USE THE MEMORY?",
+            "font_size": 16,
+            "fill": "#efd09a"
+          },
+          {
+            "id": "charttitle",
+            "type": "text",
+            "x": 44,
+            "y": 81,
+            "text": "Same design question. Different consumer.",
+            "font_size": 28,
+            "fill": "#f6f1e7"
+          },
+          {
+            "id": "stronglabel",
+            "type": "text",
+            "x": 44,
+            "y": 117,
+            "text": "Stronger executor · gpt-4.1",
+            "font_size": 18,
+            "fill": "#90d4e7",
+            "opacity": {
+              "op": "sub",
+              "args": [
+                1,
+                {
+                  "var": "executor"
+                }
+              ]
+            }
+          },
+          {
+            "id": "weaklabel",
+            "type": "text",
+            "x": 44,
+            "y": 117,
+            "text": "Weaker executor · gpt-4.1-mini",
+            "font_size": 18,
+            "fill": "#90d4e7",
+            "opacity": {
+              "var": "executor"
+            }
+          },
+          {
+            "id": "scope",
+            "type": "text",
+            "x": 515,
+            "y": 117,
+            "text": "140 ALFWorld tasks · three-chain protocol",
+            "font_size": 16,
+            "fill": "#acbcc7"
+          },
+          {
+            "id": "grid0",
+            "type": "line",
+            "x1": 290.0,
+            "y1": 148,
+            "x2": 290.0,
+            "y2": 426,
+            "stroke": "#354853"
+          },
+          {
+            "id": "tick0",
+            "type": "text",
+            "x": 282.0,
+            "y": 145,
+            "text": "0",
+            "font_size": 14,
+            "fill": "#acbcc7"
+          },
+          {
+            "id": "grid25",
+            "type": "line",
+            "x1": 407.5,
+            "y1": 148,
+            "x2": 407.5,
+            "y2": 426,
+            "stroke": "#354853"
+          },
+          {
+            "id": "tick25",
+            "type": "text",
+            "x": 399.5,
+            "y": 145,
+            "text": "25",
+            "font_size": 14,
+            "fill": "#acbcc7"
+          },
+          {
+            "id": "grid50",
+            "type": "line",
+            "x1": 525.0,
+            "y1": 148,
+            "x2": 525.0,
+            "y2": 426,
+            "stroke": "#354853"
+          },
+          {
+            "id": "tick50",
+            "type": "text",
+            "x": 517.0,
+            "y": 145,
+            "text": "50",
+            "font_size": 14,
+            "fill": "#acbcc7"
+          },
+          {
+            "id": "grid75",
+            "type": "line",
+            "x1": 642.5,
+            "y1": 148,
+            "x2": 642.5,
+            "y2": 426,
+            "stroke": "#354853"
+          },
+          {
+            "id": "tick75",
+            "type": "text",
+            "x": 634.5,
+            "y": 145,
+            "text": "75",
+            "font_size": 14,
+            "fill": "#acbcc7"
+          },
+          {
+            "id": "grid100",
+            "type": "line",
+            "x1": 760.0,
+            "y1": 148,
+            "x2": 760.0,
+            "y2": 426,
+            "stroke": "#354853"
+          },
+          {
+            "id": "tick100",
+            "type": "text",
+            "x": 752.0,
+            "y": 145,
+            "text": "100",
+            "font_size": 14,
+            "fill": "#acbcc7"
+          },
+          {
+            "id": "store0",
+            "type": "text",
+            "x": 44,
+            "y": 187,
+            "text": "No store",
+            "font_size": 18,
+            "fill": "#f6f1e7"
+          },
+          {
+            "id": "bar0",
+            "type": "rect",
+            "x": 290,
+            "y": 166,
+            "width": {
+              "op": "mul",
+              "args": [
+                4.7,
+                {
+                  "var": "score0"
+                }
+              ]
+            },
+            "height": 32,
+            "rx": 5,
+            "fill": "#648c9d",
+            "reveal": {
+              "title": "No store",
+              "text": "The executor attempts each task without a persistent experience store.",
+              "block_id": "memory-variants"
+            }
+          },
+          {
+            "id": "result0",
+            "type": "text",
+            "x": 791,
+            "y": 189,
+            "text": "{{score0:1}}%",
+            "font_size": 20,
+            "fill": "#648c9d"
+          },
+          {
+            "id": "store1",
+            "type": "text",
+            "x": 44,
+            "y": 239,
+            "text": "Episode log",
+            "font_size": 18,
+            "fill": "#f6f1e7"
+          },
+          {
+            "id": "bar1",
+            "type": "rect",
+            "x": 290,
+            "y": 218,
+            "width": {
+              "op": "mul",
+              "args": [
+                4.7,
+                {
+                  "var": "score1"
+                }
+              ]
+            },
+            "height": 32,
+            "rx": 5,
+            "fill": "#90d4e7",
+            "reveal": {
+              "title": "Episode log",
+              "text": "Earlier task trajectories are appended mechanically, and retrieval supplies complete episode files.",
+              "block_id": "memory-variants"
+            }
+          },
+          {
+            "id": "result1",
+            "type": "text",
+            "x": 791,
+            "y": 241,
+            "text": "{{score1:1}}%",
+            "font_size": 20,
+            "fill": "#90d4e7"
+          },
+          {
+            "id": "store2",
+            "type": "text",
+            "x": 44,
+            "y": 291,
+            "text": "Curated skills",
+            "font_size": 18,
+            "fill": "#f6f1e7"
+          },
+          {
+            "id": "bar2",
+            "type": "rect",
+            "x": 290,
+            "y": 270,
+            "width": {
+              "op": "mul",
+              "args": [
+                4.7,
+                {
+                  "var": "score2"
+                }
+              ]
+            },
+            "height": 32,
+            "rx": 5,
+            "fill": "#648c9d",
+            "reveal": {
+              "title": "Curated skills",
+              "text": "A management agent writes procedure files from earlier attempts; the executor receives relevant file contents.",
+              "block_id": "memory-variants"
+            }
+          },
+          {
+            "id": "result2",
+            "type": "text",
+            "x": 791,
+            "y": 293,
+            "text": "{{score2:1}}%",
+            "font_size": 20,
+            "fill": "#648c9d"
+          },
+          {
+            "id": "store3",
+            "type": "text",
+            "x": 44,
+            "y": 343,
+            "text": "Skills + memory",
+            "font_size": 18,
+            "fill": "#f6f1e7"
+          },
+          {
+            "id": "bar3",
+            "type": "rect",
+            "x": 290,
+            "y": 322,
+            "width": {
+              "op": "mul",
+              "args": [
+                4.7,
+                {
+                  "var": "score3"
+                }
+              ]
+            },
+            "height": 32,
+            "rx": 5,
+            "fill": "#648c9d",
+            "reveal": {
+              "title": "Curated skills+mem",
+              "text": "The store combines skills with notes and uses stricter relevance and positive-procedure gates.",
+              "block_id": "memory-variants"
+            }
+          },
+          {
+            "id": "result3",
+            "type": "text",
+            "x": 791,
+            "y": 345,
+            "text": "{{score3:1}}%",
+            "font_size": 20,
+            "fill": "#648c9d"
+          },
+          {
+            "id": "store4",
+            "type": "text",
+            "x": 44,
+            "y": 395,
+            "text": "Skills + memory (GS)",
+            "font_size": 18,
+            "fill": "#f6f1e7"
+          },
+          {
+            "id": "bar4",
+            "type": "rect",
+            "x": 290,
+            "y": 374,
+            "width": {
+              "op": "mul",
+              "args": [
+                4.7,
+                {
+                  "var": "score4"
+                }
+              ]
+            },
+            "height": 32,
+            "rx": 5,
+            "fill": "#efd09a",
+            "reveal": {
+              "title": "Curated skills+mem (GS)",
+              "text": "GS means guidance synthesis: retrieval writes advice for the current task from the skills-and-memory store.",
+              "block_id": "memory-variants"
+            }
+          },
+          {
+            "id": "result4",
+            "type": "text",
+            "x": 791,
+            "y": 397,
+            "text": "{{score4:1}}%",
+            "font_size": 20,
+            "fill": "#efd09a"
+          },
+          {
+            "id": "gap",
+            "type": "text",
+            "x": 44,
+            "y": 457,
+            "text": "Episode log − GS: {{log_minus_gs:1}} percentage points",
+            "font_size": 22,
+            "fill": "#f6f1e7"
+          },
+          {
+            "id": "strongcaution",
+            "type": "text",
+            "x": 44,
+            "y": 494,
+            "text": "Log leads by 7 / 140; paired p ≈ .23. The ordering remains unsettled.",
+            "font_size": 17,
+            "fill": "#acbcc7",
+            "opacity": {
+              "op": "sub",
+              "args": [
+                1,
+                {
+                  "var": "executor"
+                }
+              ]
+            }
+          },
+          {
+            "id": "weakcaution",
+            "type": "text",
+            "x": 44,
+            "y": 494,
+            "text": "GS leads by 14 / 140; paired p ≈ .02. Evidence favors GS in this comparison.",
+            "font_size": 17,
+            "fill": "#acbcc7",
+            "opacity": {
+              "var": "executor"
+            }
+          },
+          {
+            "id": "chartfoot",
+            "type": "text",
+            "x": 44,
+            "y": 524,
+            "text": "Read rankings within each tier. This is not a universal ranking of memory architectures.",
+            "font_size": 15,
+            "fill": "#acbcc7"
+          }
+        ],
+        "keyframes": []
+      },
+      "steps": [
+        {
+          "time": 0,
+          "title": "Start with the no-store floor",
+          "text": "Memory must help the executor do the task; an attractive store is not the outcome."
+        },
+        {
+          "time": 0.3,
+          "title": "Inspect what gets delivered",
+          "text": "A raw episode, a procedure file and task-specific synthesized guidance ask different work of the consumer."
+        },
+        {
+          "time": 0.66,
+          "title": "Keep the uncertainty attached",
+          "text": "The weaker-tier GS advantage is supported here. The stronger-tier episode-log lead remains suggestive."
+        }
+      ],
+      "assumptions": [
+        "Values are the reported Table 5 success percentages for 140 ALFWorld tasks under the three-chain protocol, not measurements of Lucerna or human learning.",
+        "Only the two reported execution tiers are selectable; the visual does not interpolate unmeasured model strengths.",
+        "The paired significance statements come from the paper's discussion of Episode log versus GS. The stronger-tier reverse ordering remains statistically unsettled.",
+        "Compare variants within a tier; the paper permits a qualitative consumer contrast across tiers, not a universal causal estimate for switching every deployment's model."
+      ]
+    },
+    {
+      "id": "memory-economics",
+      "title": "Does the useful view repay the work of building it?",
+      "section_id": "memory-3",
+      "source_anchors": [
+        {
+          "block_id": "memory-evidence-3",
+          "relation": "illustrates"
+        },
+        {
+          "block_id": "memory-evidence-3-limits",
+          "relation": "supports"
+        }
+      ],
+      "explanation": "The paper measures building, retrieval and execution separately. In the weaker-executor condition, the episode log costs $7.88 to search across the 140 tasks, versus $2.97 for guidance synthesis; GS also incurs a $10.56 build bill. The reported deployment totals, including execution, are $12.54 and $6.07. Change the execution tier, choose whether to count execution, and move the reuse control. The curves are a deliberately simple what-if: pay the reported build bill once, then repeat an unchanged per-batch cost. They are not a measured forecast. Under the weaker tier with execution included, the illustrative crossover is about 1.63 batches; at one batch the build-inclusive GS total is still higher. Cost alone does not settle the choice: the success rates come from the separate reported task experiment, and no future accuracy is assumed by these curves.",
+      "narration": "The paper measures building, retrieval and execution separately. In the weaker-executor condition, the episode log costs $7.88 to search across the 140 tasks, versus $2.97 for guidance synthesis; GS also incurs a $10.56 build bill. The reported deployment totals, including execution, are $12.54 and $6.07. Change the execution tier, choose whether to count execution, and move the reuse control. The curves are a deliberately simple what-if: pay the reported build bill once, then repeat an unchanged per-batch cost. They are not a measured forecast. Under the weaker tier with execution included, the illustrative crossover is about 1.63 batches; at one batch the build-inclusive GS total is still higher. Cost alone does not settle the choice: the success rates come from the separate reported task experiment, and no future accuracy is assumed by these curves.",
+      "alt_text": "The paper measures building, retrieval and execution separately. In the weaker-executor condition, the episode log costs $7.88 to search across the 140 tasks, versus $2.97 for guidance synthesis; GS also incurs a $10.56 build bill. The reported deployment totals, including execution, are $12.54 and $6.07. Change the execution tier, choose whether to count execution, and move the reuse control. The curves are a deliberately simple what-if: pay the reported build bill once, then repeat an unchanged per-batch cost. They are not a measured forecast. Under the weaker tier with execution included, the illustrative crossover is about 1.63 batches; at one batch the build-inclusive GS total is still higher. Cost alone does not settle the choice: the success rates come from the separate reported task experiment, and no future accuracy is assumed by these curves. All chart values and the causal readouts are also available as text.",
+      "duration": 18,
+      "controls": [
+        {
+          "id": "executor",
+          "label": "Execution agent in the reported experiment",
+          "type": "select",
+          "default": 1,
+          "options": [
+            {
+              "label": "Stronger · gpt-4.1",
+              "value": 0
+            },
+            {
+              "label": "Weaker · gpt-4.1-mini",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "id": "retrieval_only",
+          "label": "Cost included per reuse batch",
+          "type": "select",
+          "default": 0,
+          "options": [
+            {
+              "label": "Retrieval + execution",
+              "value": 0
+            },
+            {
+              "label": "Retrieval only",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "id": "batches",
+          "label": "Hypothetical reuse volume (140-task-equivalent batches)",
+          "type": "range",
+          "min": 0,
+          "max": 10,
+          "step": 1,
+          "default": 1
+        }
+      ],
+      "variables": {
+        "build_gs": {
+          "op": "add",
+          "args": [
+            9.66,
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "sub",
+                  "args": [
+                    10.56,
+                    9.66
+                  ]
+                },
+                {
+                  "var": "executor"
+                }
+              ]
+            }
+          ]
+        },
+        "search_log": {
+          "op": "add",
+          "args": [
+            6.62,
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "sub",
+                  "args": [
+                    7.88,
+                    6.62
+                  ]
+                },
+                {
+                  "var": "executor"
+                }
+              ]
+            }
+          ]
+        },
+        "search_gs": {
+          "op": "add",
+          "args": [
+            3.75,
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "sub",
+                  "args": [
+                    2.97,
+                    3.75
+                  ]
+                },
+                {
+                  "var": "executor"
+                }
+              ]
+            }
+          ]
+        },
+        "exec_log": {
+          "op": "add",
+          "args": [
+            12.15,
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "sub",
+                  "args": [
+                    4.67,
+                    12.15
+                  ]
+                },
+                {
+                  "var": "executor"
+                }
+              ]
+            }
+          ]
+        },
+        "exec_gs": {
+          "op": "add",
+          "args": [
+            13.63,
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "sub",
+                  "args": [
+                    3.1,
+                    13.63
+                  ]
+                },
+                {
+                  "var": "executor"
+                }
+              ]
+            }
+          ]
+        },
+        "deploy_log": {
+          "op": "add",
+          "args": [
+            18.77,
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "sub",
+                  "args": [
+                    12.54,
+                    18.77
+                  ]
+                },
+                {
+                  "var": "executor"
+                }
+              ]
+            }
+          ]
+        },
+        "deploy_gs": {
+          "op": "add",
+          "args": [
+            17.38,
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "sub",
+                  "args": [
+                    6.07,
+                    17.38
+                  ]
+                },
+                {
+                  "var": "executor"
+                }
+              ]
+            }
+          ]
+        },
+        "unit_log": {
+          "op": "add",
+          "args": [
+            {
+              "var": "deploy_log"
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "sub",
+                  "args": [
+                    {
+                      "var": "search_log"
+                    },
+                    {
+                      "var": "deploy_log"
+                    }
+                  ]
+                },
+                {
+                  "var": "retrieval_only"
+                }
+              ]
+            }
+          ]
+        },
+        "unit_gs": {
+          "op": "add",
+          "args": [
+            {
+              "var": "deploy_gs"
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "sub",
+                  "args": [
+                    {
+                      "var": "search_gs"
+                    },
+                    {
+                      "var": "deploy_gs"
+                    }
+                  ]
+                },
+                {
+                  "var": "retrieval_only"
+                }
+              ]
+            }
+          ]
+        },
+        "total_log": {
+          "op": "mul",
+          "args": [
+            {
+              "var": "batches"
+            },
+            {
+              "var": "unit_log"
+            }
+          ]
+        },
+        "total_gs": {
+          "op": "add",
+          "args": [
+            {
+              "var": "build_gs"
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "var": "batches"
+                },
+                {
+                  "var": "unit_gs"
+                }
+              ]
+            }
+          ]
+        },
+        "crossover": {
+          "op": "div",
+          "args": [
+            {
+              "var": "build_gs"
+            },
+            {
+              "op": "sub",
+              "args": [
+                {
+                  "var": "unit_log"
+                },
+                {
+                  "var": "unit_gs"
+                }
+              ]
+            }
+          ]
+        },
+        "ymax": {
+          "op": "mul",
+          "args": [
+            1.12,
+            {
+              "op": "max",
+              "args": [
+                {
+                  "op": "mul",
+                  "args": [
+                    10,
+                    {
+                      "var": "unit_log"
+                    }
+                  ]
+                },
+                {
+                  "op": "add",
+                  "args": [
+                    {
+                      "var": "build_gs"
+                    },
+                    {
+                      "op": "mul",
+                      "args": [
+                        10,
+                        {
+                          "var": "unit_gs"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "yhalf": {
+          "op": "div",
+          "args": [
+            {
+              "var": "ymax"
+            },
+            2
+          ]
+        },
+        "cursor_x": {
+          "op": "add",
+          "args": [
+            85,
+            {
+              "op": "mul",
+              "args": [
+                50,
+                {
+                  "var": "batches"
+                }
+              ]
+            }
+          ]
+        },
+        "cursor_log_y": {
+          "op": "sub",
+          "args": [
+            405,
+            {
+              "op": "mul",
+              "args": [
+                255,
+                {
+                  "op": "div",
+                  "args": [
+                    {
+                      "var": "total_log"
+                    },
+                    {
+                      "var": "ymax"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "cursor_gs_y": {
+          "op": "sub",
+          "args": [
+            405,
+            {
+              "op": "mul",
+              "args": [
+                255,
+                {
+                  "op": "div",
+                  "args": [
+                    {
+                      "var": "total_gs"
+                    },
+                    {
+                      "var": "ymax"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "presets": [
+        {
+          "id": "weak_first",
+          "title": "The first weaker-tier deployment",
+          "parameters": {
+            "executor": 1,
+            "retrieval_only": 0,
+            "batches": 1
+          },
+          "description": ""
+        },
+        {
+          "id": "weak_reuse",
+          "title": "Reuse can repay the build",
+          "parameters": {
+            "executor": 1,
+            "retrieval_only": 0,
+            "batches": 2
+          },
+          "description": ""
+        },
+        {
+          "id": "strong_reuse",
+          "title": "The stronger-tier tradeoff",
+          "parameters": {
+            "executor": 0,
+            "retrieval_only": 0,
+            "batches": 2
+          },
+          "description": ""
+        },
+        {
+          "id": "just_search",
+          "title": "Count only retrieval",
+          "parameters": {
+            "executor": 1,
+            "retrieval_only": 1,
+            "batches": 2
+          },
+          "description": ""
+        }
+      ],
+      "visual": {
+        "width": 900,
+        "height": 540,
+        "objects": [
+          {
+            "id": "eyebrow",
+            "type": "text",
+            "x": 44,
+            "y": 40,
+            "text": "03  /  THE BUILD BILL DOES NOT VANISH",
+            "font_size": 16,
+            "fill": "#efd09a"
+          },
+          {
+            "id": "costtitle",
+            "type": "text",
+            "x": 44,
+            "y": 80,
+            "text": "Cheap retrieval is only part of the bill.",
+            "font_size": 28,
+            "fill": "#f6f1e7"
+          },
+          {
+            "id": "scenario",
+            "type": "text",
+            "x": 44,
+            "y": 111,
+            "text": "Hypothetical reuse · one build, unchanged rates and constant per-batch costs",
+            "font_size": 16,
+            "fill": "#ed9c97"
+          },
+          {
+            "id": "ytitle",
+            "type": "text",
+            "x": 44,
+            "y": 139,
+            "text": "TOTAL $",
+            "font_size": 14,
+            "fill": "#acbcc7"
+          },
+          {
+            "id": "xaxis",
+            "type": "line",
+            "x1": 85,
+            "y1": 405,
+            "x2": 585,
+            "y2": 405,
+            "stroke": "#acbcc7"
+          },
+          {
+            "id": "yaxis",
+            "type": "line",
+            "x1": 85,
+            "y1": 150,
+            "x2": 85,
+            "y2": 405,
+            "stroke": "#acbcc7"
+          },
+          {
+            "id": "midgrid",
+            "type": "line",
+            "x1": 85,
+            "y1": 277.5,
+            "x2": 585,
+            "y2": 277.5,
+            "stroke": "#354853"
+          },
+          {
+            "id": "topprice",
+            "type": "text",
+            "x": 17,
+            "y": 156,
+            "text": "{{ymax:0}}",
+            "font_size": 14,
+            "fill": "#acbcc7"
+          },
+          {
+            "id": "midprice",
+            "type": "text",
+            "x": 17,
+            "y": 282,
+            "text": "{{yhalf:0}}",
+            "font_size": 14,
+            "fill": "#acbcc7"
+          },
+          {
+            "id": "zeroprice",
+            "type": "text",
+            "x": 57,
+            "y": 410,
+            "text": "0",
+            "font_size": 14,
+            "fill": "#acbcc7"
+          },
+          {
+            "id": "xzero",
+            "type": "text",
+            "x": 80,
+            "y": 433,
+            "text": "0",
+            "font_size": 15,
+            "fill": "#acbcc7"
+          },
+          {
+            "id": "xfive",
+            "type": "text",
+            "x": 330,
+            "y": 433,
+            "text": "5",
+            "font_size": 15,
+            "fill": "#acbcc7"
+          },
+          {
+            "id": "xten",
+            "type": "text",
+            "x": 575,
+            "y": 433,
+            "text": "10",
+            "font_size": 15,
+            "fill": "#acbcc7"
+          },
+          {
+            "id": "batchcaption",
+            "type": "text",
+            "x": 155,
+            "y": 459,
+            "text": "Repeated 140-task-equivalent batches",
+            "font_size": 17,
+            "fill": "#acbcc7"
+          },
+          {
+            "id": "log_curve",
+            "type": "plot",
+            "x": 85,
+            "y": 150,
+            "width": 500,
+            "height": 255,
+            "x_min": 0,
+            "x_max": 10,
+            "y_min": 0,
+            "y_max": {
+              "var": "ymax"
+            },
+            "expr": {
+              "op": "mul",
+              "args": [
+                {
+                  "var": "x"
+                },
+                {
+                  "var": "unit_log"
+                }
+              ]
+            },
+            "stroke": "#90d4e7",
+            "stroke_width": 3,
+            "samples": 32,
+            "reveal": {
+              "title": "Episode log: zero model build spend",
+              "text": "Table 16 reports a zero-dollar management-agent build cost for the mechanically written log. The curve multiplies the selected reported per-140-task cost by hypothetical reuse volume.",
+              "block_id": "memory-cost-measurements"
+            }
+          },
+          {
+            "id": "gs_curve",
+            "type": "plot",
+            "x": 85,
+            "y": 150,
+            "width": 500,
+            "height": 255,
+            "x_min": 0,
+            "x_max": 10,
+            "y_min": 0,
+            "y_max": {
+              "var": "ymax"
+            },
+            "expr": {
+              "op": "add",
+              "args": [
+                {
+                  "var": "build_gs"
+                },
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "var": "x"
+                    },
+                    {
+                      "var": "unit_gs"
+                    }
+                  ]
+                }
+              ]
+            },
+            "stroke": "#efd09a",
+            "stroke_width": 3,
+            "samples": 32,
+            "reveal": {
+              "title": "Guidance synthesis: a build cost plus use",
+              "text": "Table 16 reports build spend of $9.66 in the stronger-executor condition and $10.56 in the weaker one. These are measured per-cell costs. Reusing the completed store at constant future costs is this scene's hypothetical extension.",
+              "block_id": "memory-cost-measurements"
+            }
+          },
+          {
+            "id": "cursor",
+            "type": "line",
+            "x1": {
+              "var": "cursor_x"
+            },
+            "y1": 150,
+            "x2": {
+              "var": "cursor_x"
+            },
+            "y2": 405,
+            "stroke": "#acbcc7",
+            "stroke_width": 1
+          },
+          {
+            "id": "log_point",
+            "type": "circle",
+            "cx": {
+              "var": "cursor_x"
+            },
+            "cy": {
+              "var": "cursor_log_y"
+            },
+            "r": 6,
+            "fill": "#90d4e7"
+          },
+          {
+            "id": "gs_point",
+            "type": "circle",
+            "cx": {
+              "var": "cursor_x"
+            },
+            "cy": {
+              "var": "cursor_gs_y"
+            },
+            "r": 6,
+            "fill": "#efd09a"
+          },
+          {
+            "id": "numbers",
+            "type": "rect",
+            "x": 622,
+            "y": 146,
+            "width": 235,
+            "height": 287,
+            "rx": 12,
+            "fill": "#15252f"
+          },
+          {
+            "id": "batchreadout",
+            "type": "text",
+            "x": 640,
+            "y": 178,
+            "text": "{{batches:0}} reuse batches",
+            "font_size": 21,
+            "fill": "#f6f1e7"
+          },
+          {
+            "id": "loglabel",
+            "type": "text",
+            "x": 640,
+            "y": 212,
+            "text": "Episode log",
+            "font_size": 17,
+            "fill": "#90d4e7"
+          },
+          {
+            "id": "logmoney",
+            "type": "text",
+            "x": 640,
+            "y": 243,
+            "text": "[object Object]",
+            "font_size": 30,
+            "fill": "#90d4e7"
+          },
+          {
+            "id": "gslabel",
+            "type": "text",
+            "x": 640,
+            "y": 279,
+            "text": "Guidance synthesis",
+            "font_size": 17,
+            "fill": "#efd09a"
+          },
+          {
+            "id": "gsmoney",
+            "type": "text",
+            "x": 640,
+            "y": 310,
+            "text": "[object Object]",
+            "font_size": 30,
+            "fill": "#efd09a"
+          },
+          {
+            "id": "crosslabel",
+            "type": "text",
+            "x": 640,
+            "y": 348,
+            "text": "Scenario crossover",
+            "font_size": 15,
+            "fill": "#acbcc7"
+          },
+          {
+            "id": "crossreadout",
+            "type": "text",
+            "x": 640,
+            "y": 377,
+            "text": "{{crossover:2}} batches",
+            "font_size": 23,
+            "fill": "#f6f1e7"
+          },
+          {
+            "id": "totalmetric",
+            "type": "text",
+            "x": 640,
+            "y": 409,
+            "text": "Includes execution",
+            "font_size": 14,
+            "fill": "#acbcc7",
+            "opacity": {
+              "op": "sub",
+              "args": [
+                1,
+                {
+                  "var": "retrieval_only"
+                }
+              ]
+            }
+          },
+          {
+            "id": "searchmetric",
+            "type": "text",
+            "x": 640,
+            "y": 409,
+            "text": "Retrieval cost only",
+            "font_size": 14,
+            "fill": "#acbcc7",
+            "opacity": {
+              "var": "retrieval_only"
+            }
+          },
+          {
+            "id": "sourceread1",
+            "type": "text",
+            "x": 44,
+            "y": 493,
+            "text": "Reported build: log $0 · GS [object Object]. Search / 140 tasks: [object Object] vs [object Object].",
+            "font_size": 16,
+            "fill": "#acbcc7"
+          },
+          {
+            "id": "sourceread2",
+            "type": "text",
+            "x": 44,
+            "y": 522,
+            "text": "Reported execution / 140 tasks: [object Object] vs [object Object]. No future accuracy is assumed.",
+            "font_size": 16,
+            "fill": "#acbcc7"
+          }
+        ],
+        "keyframes": []
+      },
+      "steps": [
+        {
+          "time": 0,
+          "title": "Separate the measured bills",
+          "text": "The build is an upfront cost; the paper separately prices retrieval and execution."
+        },
+        {
+          "time": 0.34,
+          "title": "Now state a scenario",
+          "text": "These straight lines assume a frozen store and constant reuse costs. That is a what-if, not another experiment."
+        },
+        {
+          "time": 0.67,
+          "title": "Inspect the crossover without overclaiming",
+          "text": "A build can be economical over enough reuse. Whether it preserves useful behavior is a separate question."
+        }
+      ],
+      "assumptions": [
+        "All empirical dollar values are Table 16's reported three-chain costs over 140 tasks at the paper's rate card. They are not current price quotes.",
+        "Curves assume one completed build, a fixed reused store, unchanged rates, no maintenance costs, and constant future per-batch retrieval/execution cost. This extrapolation was not run in the paper.",
+        "The store actually evolves during the reported task sequence; freezing its average cost and reusing it is a simplifying scenario, not an empirical law of memory growth.",
+        "Reported deployment totals are used directly. Separately rounded search and execution columns can differ from their rounded sum by a cent.",
+        "A cheaper scenario does not establish equal quality, greater human learning, or a universal memory architecture winner. No success-rate forecast is used."
+      ]
+    }
+  ],
+  "research_provenance": {
+    "paper": "https://arxiv.org/abs/2607.26637v1",
+    "version": 1,
+    "source_sha256": "4186ea9a8ca5b5534e644a2a8c36e5594226df440b167093ea406e0e9a9bf42c",
+    "empirical_sources": [
+      "Appendix D.1",
+      "Table 5",
+      "Table 16"
+    ],
+    "illustrations": "Original synthetic learner vignette and hypothetical constant-cost reuse model"
+  }
+}

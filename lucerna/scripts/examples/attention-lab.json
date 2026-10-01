@@ -1,0 +1,5734 @@
+{
+  "schema_version": 1,
+  "title": "Inside attention",
+  "document_id": "lesson-attention-instrument",
+  "overview": "Point a query. Watch the weights move. Break the mask. Follow the exact source behind each mechanism.",
+  "scenes": [
+    {
+      "id": "transformer-flow",
+      "title": "Start with the job the machine is doing",
+      "section_id": "attention-1",
+      "source_anchors": [
+        {
+          "block_id": "attention-evidence-1",
+          "relation": "illustrates"
+        }
+      ],
+      "explanation": "Think of the encoder as producing a contextual table: one numeric vector for each input position, updated using the other input positions. The decoder reads that table and the output prefix, then predicts one next symbol. The original paper uses six layers in each stack. Within a layer, attention mixes information between positions; the feed-forward network transforms each position. Residual connections and normalization keep an additional path around each sublayer. Move the output-step control to reveal how the known prefix grows. Play follows one illustrative route through the components.",
+      "narration": "Think of the encoder as producing a contextual table: one numeric vector for each input position, updated using the other input positions. The decoder reads that table and the output prefix, then predicts one next symbol. The original paper uses six layers in each stack. Within a layer, attention mixes information between positions; the feed-forward network transforms each position. Residual connections and normalization keep an additional path around each sublayer. Move the output-step control to reveal how the known prefix grows. Play follows one illustrative route through the components.",
+      "alt_text": "Think of the encoder as producing a contextual table: one numeric vector for each input position, updated using the other input positions. The decoder reads that table and the output prefix, then predicts one next symbol. The original paper uses six layers in each stack. Within a layer, attention mixes information between positions; the feed-forward network transforms each position. Residual connections and normalization keep an additional path around each sublayer. Move the output-step control to reveal how the known prefix grows. Play follows one illustrative route through the components. The visual readouts give the calculated values; controls let you change the described quantities.",
+      "assumptions": [
+        "The token sequence and moving pulse illustrate information flow; this scene does not run a trained Transformer or compute next-token probabilities.",
+        "Each large block compresses a stack of six layers from the paper. The original implementation also includes learned projections, residual connections, normalization, and output softmax.",
+        "The decoder sees shifted output embeddings. During training the mask permits parallel processing while withholding each row’s future answers."
+      ],
+      "duration": 20,
+      "controls": [
+        {
+          "id": "output_step",
+          "label": "Output step (known prefix grows)",
+          "type": "range",
+          "min": 1,
+          "max": 4,
+          "default": 2,
+          "step": 1
+        }
+      ],
+      "variables": {
+        "known": {
+          "op": "sub",
+          "args": [
+            {
+              "var": "output_step"
+            },
+            1
+          ]
+        }
+      },
+      "visual": {
+        "width": 800,
+        "height": 500,
+        "objects": [
+          {
+            "id": "headline",
+            "type": "text",
+            "x": 25,
+            "y": 27,
+            "text": "A contextual input table, then one output token at a time",
+            "font_size": 20,
+            "fill": "#edf2f7"
+          },
+          {
+            "id": "encoder",
+            "type": "rect",
+            "x": 45,
+            "y": 115,
+            "width": 270,
+            "height": 110,
+            "rx": 8,
+            "fill": "#233d48"
+          },
+          {
+            "id": "encoder-title",
+            "type": "text",
+            "x": 65,
+            "y": 145,
+            "text": "ENCODER",
+            "font_size": 19,
+            "fill": "#edf2f7"
+          },
+          {
+            "id": "encoder-a",
+            "type": "text",
+            "x": 65,
+            "y": 174,
+            "text": "Mix input positions with attention",
+            "font_size": 15,
+            "fill": "#edf2f7"
+          },
+          {
+            "id": "encoder-b",
+            "type": "text",
+            "x": 65,
+            "y": 199,
+            "text": "Transform each position with an FFN",
+            "font_size": 15,
+            "fill": "#edf2f7"
+          },
+          {
+            "id": "input-embedding",
+            "type": "rect",
+            "x": 45,
+            "y": 290,
+            "width": 270,
+            "height": 58,
+            "rx": 8,
+            "fill": "#233d48"
+          },
+          {
+            "id": "input-label",
+            "type": "text",
+            "x": 64,
+            "y": 313,
+            "text": "Token embeddings + positions",
+            "font_size": 16,
+            "fill": "#edf2f7"
+          },
+          {
+            "id": "input-shape",
+            "type": "text",
+            "x": 64,
+            "y": 336,
+            "text": "Input: an array of numeric vectors",
+            "font_size": 14,
+            "fill": "#b9c7d8"
+          },
+          {
+            "id": "to-encoder",
+            "type": "arrow",
+            "x1": 180,
+            "y1": 290,
+            "x2": 180,
+            "y2": 230,
+            "stroke": "#69d8ba",
+            "stroke_width": 2
+          },
+          {
+            "id": "residuals",
+            "type": "text",
+            "x": 55,
+            "y": 253,
+            "text": "Residual routes + normalization",
+            "font_size": 14,
+            "fill": "#b9c7d8"
+          },
+          {
+            "id": "decoder",
+            "type": "rect",
+            "x": 460,
+            "y": 115,
+            "width": 295,
+            "height": 125,
+            "rx": 8,
+            "fill": "#233d48"
+          },
+          {
+            "id": "decoder-title",
+            "type": "text",
+            "x": 480,
+            "y": 141,
+            "text": "DECODER",
+            "font_size": 19,
+            "fill": "#edf2f7"
+          },
+          {
+            "id": "decoder-a",
+            "type": "text",
+            "x": 480,
+            "y": 167,
+            "text": "1. Attend over allowed output prefix",
+            "font_size": 14,
+            "fill": "#edf2f7"
+          },
+          {
+            "id": "decoder-b",
+            "type": "text",
+            "x": 480,
+            "y": 193,
+            "text": "2. Read the encoded input (cross-attn)",
+            "font_size": 14,
+            "fill": "#edf2f7"
+          },
+          {
+            "id": "decoder-c",
+            "type": "text",
+            "x": 480,
+            "y": 219,
+            "text": "3. Transform each position with an FFN",
+            "font_size": 14,
+            "fill": "#edf2f7"
+          },
+          {
+            "id": "cross-attention",
+            "type": "arrow",
+            "x1": 315,
+            "y1": 175,
+            "x2": 456,
+            "y2": 175,
+            "stroke": "#69d8ba",
+            "stroke_width": 2
+          },
+          {
+            "id": "cross-label",
+            "type": "text",
+            "x": 327,
+            "y": 157,
+            "text": "keys + values",
+            "font_size": 13,
+            "fill": "#edf2f7"
+          },
+          {
+            "id": "prediction",
+            "type": "rect",
+            "x": 470,
+            "y": 42,
+            "width": 275,
+            "height": 45,
+            "rx": 8,
+            "fill": "#233d48"
+          },
+          {
+            "id": "prediction-label",
+            "type": "text",
+            "x": 488,
+            "y": 70,
+            "text": "Next-token distribution",
+            "font_size": 17,
+            "fill": "#edf2f7"
+          },
+          {
+            "id": "predict-arrow",
+            "type": "arrow",
+            "x1": 608,
+            "y1": 113,
+            "x2": 608,
+            "y2": 89,
+            "stroke": "#69d8ba",
+            "stroke_width": 2
+          },
+          {
+            "id": "prefix-up",
+            "type": "arrow",
+            "x1": 608,
+            "y1": 291,
+            "x2": 608,
+            "y2": 243,
+            "stroke": "#69d8ba",
+            "stroke_width": 2
+          },
+          {
+            "id": "prefix-embed",
+            "type": "rect",
+            "x": 460,
+            "y": 290,
+            "width": 295,
+            "height": 58,
+            "rx": 8,
+            "fill": "#233d48"
+          },
+          {
+            "id": "prefix-label",
+            "type": "text",
+            "x": 477,
+            "y": 316,
+            "text": "Shifted output embeddings + positions",
+            "font_size": 14,
+            "fill": "#edf2f7"
+          },
+          {
+            "id": "prefix-start",
+            "type": "text",
+            "x": 478,
+            "y": 337,
+            "text": "Each row can use its known past",
+            "font_size": 14,
+            "fill": "#b9c7d8"
+          },
+          {
+            "id": "input-caption",
+            "type": "text",
+            "x": 45,
+            "y": 418,
+            "text": "Illustrative input tokens",
+            "font_size": 15,
+            "fill": "#b9c7d8"
+          },
+          {
+            "id": "prefix-caption",
+            "type": "text",
+            "x": 460,
+            "y": 443,
+            "text": "Visible prefix: {{known}} output tokens",
+            "font_size": 15,
+            "fill": "#b9c7d8"
+          },
+          {
+            "id": "step-caption",
+            "type": "text",
+            "x": 40,
+            "y": 483,
+            "text": "Output step {{output_step}}: consume the prefix, predict the next symbol.",
+            "font_size": 17,
+            "fill": "#edf2f7"
+          },
+          {
+            "id": "travel",
+            "type": "circle",
+            "cx": 180,
+            "cy": 382,
+            "r": 6,
+            "fill": "#f3b86d"
+          },
+          {
+            "id": "input-0",
+            "type": "rect",
+            "x": 45,
+            "y": 367,
+            "width": 80,
+            "height": 33,
+            "rx": 8,
+            "fill": "#233d48"
+          },
+          {
+            "id": "input-text-0",
+            "type": "text",
+            "x": 56,
+            "y": 389,
+            "text": "I",
+            "font_size": 16,
+            "fill": "#edf2f7"
+          },
+          {
+            "id": "input-1",
+            "type": "rect",
+            "x": 133,
+            "y": 367,
+            "width": 80,
+            "height": 33,
+            "rx": 8,
+            "fill": "#233d48"
+          },
+          {
+            "id": "input-text-1",
+            "type": "text",
+            "x": 144,
+            "y": 389,
+            "text": "love",
+            "font_size": 16,
+            "fill": "#edf2f7"
+          },
+          {
+            "id": "input-2",
+            "type": "rect",
+            "x": 221,
+            "y": 367,
+            "width": 80,
+            "height": 33,
+            "rx": 8,
+            "fill": "#233d48"
+          },
+          {
+            "id": "input-text-2",
+            "type": "text",
+            "x": 232,
+            "y": 389,
+            "text": "tea",
+            "font_size": 16,
+            "fill": "#edf2f7"
+          },
+          {
+            "id": "prefix-0",
+            "type": "rect",
+            "x": 460,
+            "y": 367,
+            "width": 68,
+            "height": 34,
+            "rx": 8,
+            "fill": "#233d48",
+            "opacity": {
+              "op": "clamp",
+              "args": [
+                {
+                  "op": "sub",
+                  "args": [
+                    {
+                      "var": "output_step"
+                    },
+                    0
+                  ]
+                },
+                0,
+                1
+              ]
+            }
+          },
+          {
+            "id": "prefix-text-0",
+            "type": "text",
+            "x": 469,
+            "y": 389,
+            "text": "<start>",
+            "font_size": 14,
+            "fill": "#edf2f7",
+            "opacity": {
+              "op": "clamp",
+              "args": [
+                {
+                  "op": "sub",
+                  "args": [
+                    {
+                      "var": "output_step"
+                    },
+                    0
+                  ]
+                },
+                0,
+                1
+              ]
+            }
+          },
+          {
+            "id": "prefix-1",
+            "type": "rect",
+            "x": 535,
+            "y": 367,
+            "width": 68,
+            "height": 34,
+            "rx": 8,
+            "fill": "#233d48",
+            "opacity": {
+              "op": "clamp",
+              "args": [
+                {
+                  "op": "sub",
+                  "args": [
+                    {
+                      "var": "output_step"
+                    },
+                    1
+                  ]
+                },
+                0,
+                1
+              ]
+            }
+          },
+          {
+            "id": "prefix-text-1",
+            "type": "text",
+            "x": 544,
+            "y": 389,
+            "text": "J'",
+            "font_size": 14,
+            "fill": "#edf2f7",
+            "opacity": {
+              "op": "clamp",
+              "args": [
+                {
+                  "op": "sub",
+                  "args": [
+                    {
+                      "var": "output_step"
+                    },
+                    1
+                  ]
+                },
+                0,
+                1
+              ]
+            }
+          },
+          {
+            "id": "prefix-2",
+            "type": "rect",
+            "x": 610,
+            "y": 367,
+            "width": 68,
+            "height": 34,
+            "rx": 8,
+            "fill": "#233d48",
+            "opacity": {
+              "op": "clamp",
+              "args": [
+                {
+                  "op": "sub",
+                  "args": [
+                    {
+                      "var": "output_step"
+                    },
+                    2
+                  ]
+                },
+                0,
+                1
+              ]
+            }
+          },
+          {
+            "id": "prefix-text-2",
+            "type": "text",
+            "x": 619,
+            "y": 389,
+            "text": "aime",
+            "font_size": 14,
+            "fill": "#edf2f7",
+            "opacity": {
+              "op": "clamp",
+              "args": [
+                {
+                  "op": "sub",
+                  "args": [
+                    {
+                      "var": "output_step"
+                    },
+                    2
+                  ]
+                },
+                0,
+                1
+              ]
+            }
+          },
+          {
+            "id": "prefix-3",
+            "type": "rect",
+            "x": 685,
+            "y": 367,
+            "width": 68,
+            "height": 34,
+            "rx": 8,
+            "fill": "#233d48",
+            "opacity": {
+              "op": "clamp",
+              "args": [
+                {
+                  "op": "sub",
+                  "args": [
+                    {
+                      "var": "output_step"
+                    },
+                    3
+                  ]
+                },
+                0,
+                1
+              ]
+            }
+          },
+          {
+            "id": "prefix-text-3",
+            "type": "text",
+            "x": 694,
+            "y": 389,
+            "text": "le",
+            "font_size": 14,
+            "fill": "#edf2f7",
+            "opacity": {
+              "op": "clamp",
+              "args": [
+                {
+                  "op": "sub",
+                  "args": [
+                    {
+                      "var": "output_step"
+                    },
+                    3
+                  ]
+                },
+                0,
+                1
+              ]
+            }
+          },
+          {
+            "id": "next-marker",
+            "type": "arrow",
+            "x1": {
+              "op": "add",
+              "args": [
+                494,
+                {
+                  "op": "mul",
+                  "args": [
+                    75,
+                    {
+                      "var": "known"
+                    }
+                  ]
+                }
+              ]
+            },
+            "y1": 424,
+            "x2": {
+              "op": "add",
+              "args": [
+                494,
+                {
+                  "op": "mul",
+                  "args": [
+                    75,
+                    {
+                      "var": "known"
+                    }
+                  ]
+                }
+              ]
+            },
+            "y2": 405,
+            "stroke": "#f3b86d",
+            "stroke_width": 2
+          }
+        ],
+        "keyframes": [
+          {
+            "time": 0,
+            "object_id": "travel",
+            "props": {
+              "cx": 180,
+              "cy": 382
+            }
+          },
+          {
+            "time": 0.2,
+            "object_id": "travel",
+            "props": {
+              "cx": 180,
+              "cy": 319
+            }
+          },
+          {
+            "time": 0.4,
+            "object_id": "travel",
+            "props": {
+              "cx": 180,
+              "cy": 175
+            }
+          },
+          {
+            "time": 0.65,
+            "object_id": "travel",
+            "props": {
+              "cx": 608,
+              "cy": 175
+            }
+          },
+          {
+            "time": 1,
+            "object_id": "travel",
+            "props": {
+              "cx": 608,
+              "cy": 65
+            }
+          }
+        ]
+      },
+      "steps": [
+        {
+          "time": 0,
+          "title": "Represent the input",
+          "text": "Each input token becomes a vector with position information."
+        },
+        {
+          "time": 0.34,
+          "title": "Contextualize it",
+          "text": "The encoder updates each position using information from the input sequence."
+        },
+        {
+          "time": 0.65,
+          "title": "Use the prefix and source",
+          "text": "The decoder’s masked attention handles the output prefix; cross-attention reads encoder keys and values."
+        },
+        {
+          "time": 1,
+          "title": "Predict, then repeat",
+          "text": "A next-token distribution produces the next symbol. The enlarged prefix is input to the following generation step."
+        }
+      ]
+    },
+    {
+      "id": "query-key-value",
+      "title": "A query is a direction. Attention is a mixture.",
+      "section_id": "attention-2",
+      "source_anchors": [
+        {
+          "block_id": "attention-evidence-2",
+          "relation": "illustrates"
+        }
+      ],
+      "explanation": "A query is a numeric request for relevant information. Each key is compared with it by a dot product; each associated value is the payload available to mix into the answer. In this toy example the query has two components, the three keys are shown explicitly, and the payloads are single numbers. Change either query component and follow the resulting scores, softmax weights and weighted value. Turning on the paper’s square-root scaling divides scores by sqrt(2). Temperature is an extra exploration control: raising it spreads the weights. This makes the operation in softmax(QKᵀ/√dₖ)V tangible without pretending the weights are statements of truth. The moving marker traces the computation from query and keys through scores, normalized weights and the weighted answer.",
+      "narration": "A query is a numeric request for relevant information. Each key is compared with it by a dot product; each associated value is the payload available to mix into the answer. In this toy example the query has two components, the three keys are shown explicitly, and the payloads are single numbers. Change either query component and follow the resulting scores, softmax weights and weighted value. Turning on the paper’s square-root scaling divides scores by sqrt(2). Temperature is an extra exploration control: raising it spreads the weights. This makes the operation in softmax(QKᵀ/√dₖ)V tangible without pretending the weights are statements of truth. The moving marker traces the computation from query and keys through scores, normalized weights and the weighted answer.",
+      "alt_text": "The left plane shows three fixed blue keys and a gold query vector. The first matrix row shows scaled dot products; the second row shows normalized weights. A final readout computes the weighted sum of scalar values 2, 8 and -2. The full numerical readout is available below the stage.",
+      "assumptions": [
+        "The displayed keys, values, query and score magnitudes are illustrative, not measured parameters from the paper.",
+        "The toy key dimension is two. Changing the score-magnitude control multiplies dot products; it does not change dimensionality.",
+        "Temperature is a demonstration extension, not an extra parameter in the paper’s displayed base equation.",
+        "Softmax weights are mixing coefficients. A concentrated distribution does not by itself establish understanding or correctness."
+      ],
+      "duration": 20,
+      "controls": [
+        {
+          "id": "q1",
+          "label": "Query component 1",
+          "type": "range",
+          "min": -2,
+          "max": 2,
+          "default": 1,
+          "step": 0.1
+        },
+        {
+          "id": "q2",
+          "label": "Query component 2",
+          "type": "range",
+          "min": -2,
+          "max": 2,
+          "default": 0.4,
+          "step": 0.1
+        },
+        {
+          "id": "gain",
+          "label": "Dot-product magnitude multiplier",
+          "type": "range",
+          "min": 0.5,
+          "max": 3,
+          "default": 2,
+          "step": 0.1
+        },
+        {
+          "id": "scaled",
+          "label": "Divide scores by √dₖ",
+          "type": "toggle",
+          "default": 1
+        },
+        {
+          "id": "temperature",
+          "label": "Exploration temperature",
+          "type": "range",
+          "min": 0.5,
+          "max": 2,
+          "default": 1,
+          "step": 0.1
+        }
+      ],
+      "variables": {
+        "raw1": {
+          "op": "mul",
+          "args": [
+            {
+              "var": "gain"
+            },
+            {
+              "var": "q1"
+            }
+          ]
+        },
+        "raw2": {
+          "op": "mul",
+          "args": [
+            {
+              "var": "gain"
+            },
+            {
+              "var": "q2"
+            }
+          ]
+        },
+        "raw3": {
+          "op": "mul",
+          "args": [
+            {
+              "var": "gain"
+            },
+            {
+              "op": "add",
+              "args": [
+                {
+                  "var": "q1"
+                },
+                {
+                  "var": "q2"
+                }
+              ]
+            }
+          ]
+        },
+        "denom": {
+          "op": "mul",
+          "args": [
+            {
+              "var": "temperature"
+            },
+            {
+              "op": "add",
+              "args": [
+                1,
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "var": "scaled"
+                    },
+                    0.41421356237309515
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "score1": {
+          "op": "div",
+          "args": [
+            {
+              "var": "raw1"
+            },
+            {
+              "var": "denom"
+            }
+          ]
+        },
+        "e1": {
+          "op": "exp",
+          "args": [
+            {
+              "var": "score1"
+            }
+          ]
+        },
+        "score2": {
+          "op": "div",
+          "args": [
+            {
+              "var": "raw2"
+            },
+            {
+              "var": "denom"
+            }
+          ]
+        },
+        "e2": {
+          "op": "exp",
+          "args": [
+            {
+              "var": "score2"
+            }
+          ]
+        },
+        "score3": {
+          "op": "div",
+          "args": [
+            {
+              "var": "raw3"
+            },
+            {
+              "var": "denom"
+            }
+          ]
+        },
+        "e3": {
+          "op": "exp",
+          "args": [
+            {
+              "var": "score3"
+            }
+          ]
+        },
+        "Z": {
+          "op": "add",
+          "args": [
+            {
+              "var": "e1"
+            },
+            {
+              "var": "e2"
+            },
+            {
+              "var": "e3"
+            }
+          ]
+        },
+        "w1": {
+          "op": "div",
+          "args": [
+            {
+              "var": "e1"
+            },
+            {
+              "var": "Z"
+            }
+          ]
+        },
+        "w2": {
+          "op": "div",
+          "args": [
+            {
+              "var": "e2"
+            },
+            {
+              "var": "Z"
+            }
+          ]
+        },
+        "w3": {
+          "op": "div",
+          "args": [
+            {
+              "var": "e3"
+            },
+            {
+              "var": "Z"
+            }
+          ]
+        },
+        "result": {
+          "op": "add",
+          "args": [
+            {
+              "op": "mul",
+              "args": [
+                2,
+                {
+                  "var": "w1"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                8,
+                {
+                  "var": "w2"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                -2,
+                {
+                  "var": "w3"
+                }
+              ]
+            }
+          ]
+        },
+        "sum": {
+          "op": "add",
+          "args": [
+            {
+              "var": "w1"
+            },
+            {
+              "var": "w2"
+            },
+            {
+              "var": "w3"
+            }
+          ]
+        }
+      },
+      "visual": {
+        "width": 960,
+        "height": 540,
+        "objects": [
+          {
+            "id": "eyebrow",
+            "type": "text",
+            "x": 32,
+            "y": 35,
+            "text": "01 / MATCH DIRECTION",
+            "font_size": 14,
+            "fill": "#dbb577"
+          },
+          {
+            "id": "matrix-label",
+            "type": "text",
+            "x": 402,
+            "y": 35,
+            "text": "02 / NORMALIZE THE SCORES",
+            "font_size": 14,
+            "fill": "#dbb577"
+          },
+          {
+            "id": "plane",
+            "type": "rect",
+            "x": 28,
+            "y": 60,
+            "width": 305,
+            "height": 340,
+            "rx": 10,
+            "fill": "#182630"
+          },
+          {
+            "id": "query-read",
+            "type": "text",
+            "x": 48,
+            "y": 89,
+            "text": "q = [{{q1:1}}, {{q2:1}}]",
+            "font_size": 20,
+            "fill": "#e9edf1"
+          },
+          {
+            "id": "axis-x",
+            "type": "line",
+            "x1": 56,
+            "y1": 234,
+            "x2": 308,
+            "y2": 234,
+            "stroke": "#41505a"
+          },
+          {
+            "id": "axis-y",
+            "type": "line",
+            "x1": 182,
+            "y1": 110,
+            "x2": 182,
+            "y2": 365,
+            "stroke": "#41505a"
+          },
+          {
+            "id": "key-one",
+            "type": "vector",
+            "x": 182,
+            "y": 234,
+            "dx": 1,
+            "dy": 0,
+            "scale": 65,
+            "label": "k₁",
+            "stroke": "#9ad8eb",
+            "reveal": {
+              "title": "Key 1",
+              "text": "Key [1,0] responds to the first query component. Its scalar value is 2.",
+              "block_id": "attention-evidence-2"
+            }
+          },
+          {
+            "id": "key-two",
+            "type": "vector",
+            "x": 182,
+            "y": 234,
+            "dx": 0,
+            "dy": 1,
+            "scale": 65,
+            "label": "k₂",
+            "stroke": "#9ad8eb",
+            "reveal": {
+              "title": "Key 2",
+              "text": "Key [0,1] responds to the second component. Its scalar value is 8.",
+              "block_id": "attention-evidence-2"
+            }
+          },
+          {
+            "id": "key-three",
+            "type": "vector",
+            "x": 182,
+            "y": 234,
+            "dx": 1,
+            "dy": 1,
+            "scale": 65,
+            "label": "k₃",
+            "stroke": "#9ad8eb",
+            "reveal": {
+              "title": "Key 3",
+              "text": "Key [1,1] matches both positive components. Its scalar value is -2: a strong match need not have a positive payload.",
+              "block_id": "attention-evidence-2"
+            }
+          },
+          {
+            "id": "query-vector",
+            "type": "vector",
+            "x": 182,
+            "y": 234,
+            "dx": {
+              "var": "q1"
+            },
+            "dy": {
+              "var": "q2"
+            },
+            "scale": 54,
+            "label": "q",
+            "stroke": "#dbb577",
+            "stroke_width": 4,
+            "reveal": {
+              "title": "Move the query",
+              "text": "Change q₁ and q₂. The gold direction changes; each key's dot product changes with it. Keys are fixed in this example.",
+              "block_id": "attention-evidence-2"
+            }
+          },
+          {
+            "id": "plane-note",
+            "type": "text",
+            "x": 49,
+            "y": 382,
+            "text": "Match scores depend on alignment.",
+            "font_size": 14,
+            "fill": "#aebdc7"
+          },
+          {
+            "id": "score-row",
+            "type": "matrix",
+            "x": 416,
+            "y": 96,
+            "width": 488,
+            "height": 62,
+            "values": [
+              [
+                {
+                  "var": "score1"
+                },
+                {
+                  "var": "score2"
+                },
+                {
+                  "var": "score3"
+                }
+              ]
+            ],
+            "column_labels": [
+              "Key 1",
+              "Key 2",
+              "Key 3"
+            ],
+            "min": -16,
+            "max": 16,
+            "fill": "#9ad8eb",
+            "reveal": {
+              "title": "Before softmax",
+              "text": "These are scaled query-key dot products. The query and keys have two components; dividing by √2 controls their scale.",
+              "block_id": "attention-evidence-2"
+            }
+          },
+          {
+            "id": "softmax-arrow",
+            "type": "arrow",
+            "x1": 655,
+            "y1": 170,
+            "x2": 655,
+            "y2": 206,
+            "stroke": "#dbb577",
+            "stroke_width": 2
+          },
+          {
+            "id": "softmax-label",
+            "type": "text",
+            "x": 698,
+            "y": 194,
+            "text": "softmax",
+            "font_size": 16,
+            "fill": "#b7c7d0"
+          },
+          {
+            "id": "weight-row",
+            "type": "matrix",
+            "x": 416,
+            "y": 221,
+            "width": 488,
+            "height": 92,
+            "values": [
+              [
+                {
+                  "var": "w1"
+                },
+                {
+                  "var": "w2"
+                },
+                {
+                  "var": "w3"
+                }
+              ]
+            ],
+            "min": 0,
+            "max": 1,
+            "fill": "#86debd",
+            "reveal": {
+              "title": "A row of attention",
+              "text": "Exponentiate and normalize. Each weight is nonnegative and the row sums to one. Brightness is proportional to that contribution.",
+              "block_id": "attention-evidence-2"
+            }
+          },
+          {
+            "id": "weight-sum",
+            "type": "text",
+            "x": 418,
+            "y": 344,
+            "text": "ROW SUM  {{sum:3}}",
+            "font_size": 15,
+            "fill": "#86debd"
+          },
+          {
+            "id": "values",
+            "type": "text",
+            "x": 418,
+            "y": 379,
+            "text": "Values:  2                 8                 −2",
+            "font_size": 18,
+            "fill": "#e9edf1"
+          },
+          {
+            "id": "result-panel",
+            "type": "rect",
+            "x": 28,
+            "y": 432,
+            "width": 904,
+            "height": 80,
+            "rx": 10,
+            "fill": "#233227"
+          },
+          {
+            "id": "result-label",
+            "type": "text",
+            "x": 49,
+            "y": 459,
+            "text": "03 / MIX THE PAYLOADS",
+            "font_size": 13,
+            "fill": "#a6c6b0"
+          },
+          {
+            "id": "result-value",
+            "type": "text",
+            "x": 49,
+            "y": 493,
+            "text": "2w₁ + 8w₂ − 2w₃ = {{result:3}}",
+            "font_size": 26,
+            "fill": "#e4eecb"
+          },
+          {
+            "id": "result-boundary",
+            "type": "text",
+            "x": 590,
+            "y": 479,
+            "text": "Weights choose how much. Values supply what.",
+            "font_size": 15,
+            "fill": "#c6d5ce"
+          },
+          {
+            "id": "pulse",
+            "type": "circle",
+            "cx": 345,
+            "cy": 220,
+            "r": 5,
+            "fill": "#dbb577"
+          }
+        ],
+        "keyframes": [
+          {
+            "time": 0,
+            "object_id": "pulse",
+            "props": {
+              "cx": 345,
+              "cy": 220
+            }
+          },
+          {
+            "time": 0.3,
+            "object_id": "pulse",
+            "props": {
+              "cx": 655,
+              "cy": 175
+            }
+          },
+          {
+            "time": 0.65,
+            "object_id": "pulse",
+            "props": {
+              "cx": 655,
+              "cy": 326
+            }
+          },
+          {
+            "time": 1,
+            "object_id": "pulse",
+            "props": {
+              "cx": 530,
+              "cy": 431
+            }
+          }
+        ]
+      },
+      "steps": [
+        {
+          "time": 0,
+          "title": "Compute compatibility",
+          "text": "For keys [1,0], [0,1], and [1,1], the unscaled dot products are q₁, q₂, and q₁+q₂, multiplied here by the magnitude control."
+        },
+        {
+          "time": 0.35,
+          "title": "Control score scale",
+          "text": "The paper divides by the square root of key dimension. Its variance argument assumes independent components with zero mean and unit variance."
+        },
+        {
+          "time": 0.7,
+          "title": "Normalize and mix",
+          "text": "Exponentiate and normalize the scores, then use those weights to combine values. Changing V would change the answer without changing the compatibility weights."
+        },
+        {
+          "time": 1,
+          "title": "Investigate concentration",
+          "text": "Increase score magnitude and compare scaled with unscaled weights. Then increase temperature and notice that the answer becomes a broader mixture."
+        }
+      ],
+      "presets": [
+        {
+          "id": "balanced",
+          "title": "No preferred direction",
+          "description": "A zero query gives every key the same score and an equal share.",
+          "parameters": {
+            "q1": 0,
+            "q2": 0,
+            "gain": 2,
+            "scaled": 1,
+            "temperature": 1
+          }
+        },
+        {
+          "id": "first",
+          "title": "Favor the first axis",
+          "description": "The query points toward keys 1 and 3; their equal dot products produce equal weights.",
+          "parameters": {
+            "q1": 2,
+            "q2": 0,
+            "gain": 2,
+            "scaled": 1,
+            "temperature": 1
+          }
+        },
+        {
+          "id": "opposed",
+          "title": "Oppose the diagonal",
+          "description": "The third key now points against the query. Its negative value receives little weight.",
+          "parameters": {
+            "q1": -1.5,
+            "q2": -1.5,
+            "gain": 2,
+            "scaled": 1,
+            "temperature": 1
+          }
+        },
+        {
+          "id": "sharp",
+          "title": "Make the choice sharp",
+          "description": "Low temperature concentrates weight on the largest score; this is an exploratory intervention.",
+          "parameters": {
+            "q1": 1,
+            "q2": 1,
+            "gain": 3,
+            "scaled": 1,
+            "temperature": 0.5
+          }
+        }
+      ]
+    },
+    {
+      "id": "causal-mask",
+      "title": "Show exactly what a causal mask prevents",
+      "section_id": "attention-3",
+      "source_anchors": [
+        {
+          "block_id": "attention-evidence-3",
+          "relation": "illustrates"
+        }
+      ],
+      "explanation": "The decoder may process many training positions at once, but each position must only use the allowed prefix. The paper sets forbidden pre-softmax scores to negative infinity. Their exponentials are exactly zero, so forbidden values contribute nothing. Here each label is a shifted decoder input: row 2 can use <start> and The while predicting the next output. Leave row 2 selected and change key 3’s score or payload. With masking enabled the output stays the same. Disable the mask and the future information can change the output. That is the leakage the mask prevents.",
+      "narration": "The decoder may process many training positions at once, but each position must only use the allowed prefix. The paper sets forbidden pre-softmax scores to negative infinity. Their exponentials are exactly zero, so forbidden values contribute nothing. Here each label is a shifted decoder input: row 2 can use <start> and The while predicting the next output. Leave row 2 selected and change key 3’s score or payload. With masking enabled the output stays the same. Disable the mask and the future information can change the output. That is the leakage the mask prevents.",
+      "alt_text": "A four-by-four matrix displays query rows and key columns. With masking enabled, entries above the diagonal are zero. The selected row is emphasized. Readouts report future attention mass, the third key weight and the resulting weighted value.",
+      "assumptions": [
+        "The numeric scores and values are illustrative scalar payloads, not a language model’s probabilities or trained states.",
+        "This implementation uses an exact zero numerator for masked positions, mathematically equivalent to exponentiating a negative-infinity score.",
+        "Input labels are shifted relative to output targets; the permitted diagonal is not permission to read the answer being predicted."
+      ],
+      "duration": 20,
+      "controls": [
+        {
+          "id": "mask",
+          "label": "Enforce causal mask",
+          "type": "toggle",
+          "default": 1
+        },
+        {
+          "id": "row",
+          "label": "Decoder input row",
+          "type": "range",
+          "min": 1,
+          "max": 4,
+          "default": 2,
+          "step": 1
+        },
+        {
+          "id": "key3_score",
+          "label": "Key 3 compatibility score",
+          "type": "range",
+          "min": -3,
+          "max": 4,
+          "default": 2.5,
+          "step": 0.1
+        },
+        {
+          "id": "key3_value",
+          "label": "Key 3 payload value",
+          "type": "range",
+          "min": 0,
+          "max": 20,
+          "default": 10,
+          "step": 0.5
+        }
+      ],
+      "variables": {
+        "s1": 0.4,
+        "s2": 1.2,
+        "s3": {
+          "var": "key3_score"
+        },
+        "s4": 1.6,
+        "allowed1": {
+          "op": "add",
+          "args": [
+            {
+              "op": "sub",
+              "args": [
+                1,
+                {
+                  "var": "mask"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "var": "mask"
+                },
+                {
+                  "op": "clamp",
+                  "args": [
+                    {
+                      "op": "add",
+                      "args": [
+                        {
+                          "op": "sub",
+                          "args": [
+                            {
+                              "var": "row"
+                            },
+                            1
+                          ]
+                        },
+                        1
+                      ]
+                    },
+                    0,
+                    1
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "e1": {
+          "op": "mul",
+          "args": [
+            {
+              "var": "allowed1"
+            },
+            {
+              "op": "exp",
+              "args": [
+                {
+                  "var": "s1"
+                }
+              ]
+            }
+          ]
+        },
+        "allowed2": {
+          "op": "add",
+          "args": [
+            {
+              "op": "sub",
+              "args": [
+                1,
+                {
+                  "var": "mask"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "var": "mask"
+                },
+                {
+                  "op": "clamp",
+                  "args": [
+                    {
+                      "op": "add",
+                      "args": [
+                        {
+                          "op": "sub",
+                          "args": [
+                            {
+                              "var": "row"
+                            },
+                            2
+                          ]
+                        },
+                        1
+                      ]
+                    },
+                    0,
+                    1
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "e2": {
+          "op": "mul",
+          "args": [
+            {
+              "var": "allowed2"
+            },
+            {
+              "op": "exp",
+              "args": [
+                {
+                  "var": "s2"
+                }
+              ]
+            }
+          ]
+        },
+        "allowed3": {
+          "op": "add",
+          "args": [
+            {
+              "op": "sub",
+              "args": [
+                1,
+                {
+                  "var": "mask"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "var": "mask"
+                },
+                {
+                  "op": "clamp",
+                  "args": [
+                    {
+                      "op": "add",
+                      "args": [
+                        {
+                          "op": "sub",
+                          "args": [
+                            {
+                              "var": "row"
+                            },
+                            3
+                          ]
+                        },
+                        1
+                      ]
+                    },
+                    0,
+                    1
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "e3": {
+          "op": "mul",
+          "args": [
+            {
+              "var": "allowed3"
+            },
+            {
+              "op": "exp",
+              "args": [
+                {
+                  "var": "s3"
+                }
+              ]
+            }
+          ]
+        },
+        "allowed4": {
+          "op": "add",
+          "args": [
+            {
+              "op": "sub",
+              "args": [
+                1,
+                {
+                  "var": "mask"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "var": "mask"
+                },
+                {
+                  "op": "clamp",
+                  "args": [
+                    {
+                      "op": "add",
+                      "args": [
+                        {
+                          "op": "sub",
+                          "args": [
+                            {
+                              "var": "row"
+                            },
+                            4
+                          ]
+                        },
+                        1
+                      ]
+                    },
+                    0,
+                    1
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "e4": {
+          "op": "mul",
+          "args": [
+            {
+              "var": "allowed4"
+            },
+            {
+              "op": "exp",
+              "args": [
+                {
+                  "var": "s4"
+                }
+              ]
+            }
+          ]
+        },
+        "Z": {
+          "op": "add",
+          "args": [
+            {
+              "var": "e1"
+            },
+            {
+              "var": "e2"
+            },
+            {
+              "var": "e3"
+            },
+            {
+              "var": "e4"
+            }
+          ]
+        },
+        "w1": {
+          "op": "div",
+          "args": [
+            {
+              "var": "e1"
+            },
+            {
+              "var": "Z"
+            }
+          ]
+        },
+        "w2": {
+          "op": "div",
+          "args": [
+            {
+              "var": "e2"
+            },
+            {
+              "var": "Z"
+            }
+          ]
+        },
+        "w3": {
+          "op": "div",
+          "args": [
+            {
+              "var": "e3"
+            },
+            {
+              "var": "Z"
+            }
+          ]
+        },
+        "w4": {
+          "op": "div",
+          "args": [
+            {
+              "var": "e4"
+            },
+            {
+              "var": "Z"
+            }
+          ]
+        },
+        "result": {
+          "op": "add",
+          "args": [
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "var": "w1"
+                },
+                1
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "var": "w2"
+                },
+                4
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "var": "w3"
+                },
+                {
+                  "var": "key3_value"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "var": "w4"
+                },
+                20
+              ]
+            }
+          ]
+        },
+        "future_mass": {
+          "op": "add",
+          "args": [
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "var": "w1"
+                },
+                {
+                  "op": "sub",
+                  "args": [
+                    1,
+                    {
+                      "op": "clamp",
+                      "args": [
+                        {
+                          "op": "add",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                {
+                                  "var": "row"
+                                },
+                                1
+                              ]
+                            },
+                            1
+                          ]
+                        },
+                        0,
+                        1
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "var": "w2"
+                },
+                {
+                  "op": "sub",
+                  "args": [
+                    1,
+                    {
+                      "op": "clamp",
+                      "args": [
+                        {
+                          "op": "add",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                {
+                                  "var": "row"
+                                },
+                                2
+                              ]
+                            },
+                            1
+                          ]
+                        },
+                        0,
+                        1
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "var": "w3"
+                },
+                {
+                  "op": "sub",
+                  "args": [
+                    1,
+                    {
+                      "op": "clamp",
+                      "args": [
+                        {
+                          "op": "add",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                {
+                                  "var": "row"
+                                },
+                                3
+                              ]
+                            },
+                            1
+                          ]
+                        },
+                        0,
+                        1
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "var": "w4"
+                },
+                {
+                  "op": "sub",
+                  "args": [
+                    1,
+                    {
+                      "op": "clamp",
+                      "args": [
+                        {
+                          "op": "add",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                {
+                                  "var": "row"
+                                },
+                                4
+                              ]
+                            },
+                            1
+                          ]
+                        },
+                        0,
+                        1
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "visual": {
+        "width": 960,
+        "height": 540,
+        "objects": [
+          {
+            "id": "mask-title",
+            "type": "text",
+            "x": 34,
+            "y": 36,
+            "text": "THE FUTURE CAN BE ATTRACTIVE. IT STILL GETS ZERO.",
+            "font_size": 20,
+            "fill": "#e9edf1"
+          },
+          {
+            "id": "causal-matrix",
+            "type": "matrix",
+            "x": 129,
+            "y": 96,
+            "width": 402,
+            "height": 318,
+            "values": [
+              [
+                {
+                  "op": "div",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "sub",
+                          "args": [
+                            1,
+                            {
+                              "op": "mul",
+                              "args": [
+                                {
+                                  "var": "mask"
+                                },
+                                0
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "exp",
+                          "args": [
+                            {
+                              "var": "s1"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "op": "add",
+                      "args": [
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s1"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    1
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s2"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    1
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s3"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    1
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s4"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "div",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "sub",
+                          "args": [
+                            1,
+                            {
+                              "op": "mul",
+                              "args": [
+                                {
+                                  "var": "mask"
+                                },
+                                1
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "exp",
+                          "args": [
+                            {
+                              "var": "s2"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "op": "add",
+                      "args": [
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s1"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    1
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s2"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    1
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s3"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    1
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s4"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "div",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "sub",
+                          "args": [
+                            1,
+                            {
+                              "op": "mul",
+                              "args": [
+                                {
+                                  "var": "mask"
+                                },
+                                1
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "exp",
+                          "args": [
+                            {
+                              "var": "s3"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "op": "add",
+                      "args": [
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s1"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    1
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s2"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    1
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s3"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    1
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s4"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "div",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "sub",
+                          "args": [
+                            1,
+                            {
+                              "op": "mul",
+                              "args": [
+                                {
+                                  "var": "mask"
+                                },
+                                1
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "exp",
+                          "args": [
+                            {
+                              "var": "s4"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "op": "add",
+                      "args": [
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s1"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    1
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s2"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    1
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s3"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    1
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s4"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              [
+                {
+                  "op": "div",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "sub",
+                          "args": [
+                            1,
+                            {
+                              "op": "mul",
+                              "args": [
+                                {
+                                  "var": "mask"
+                                },
+                                0
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "exp",
+                          "args": [
+                            {
+                              "var": "s1"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "op": "add",
+                      "args": [
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s1"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s2"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    1
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s3"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    1
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s4"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "div",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "sub",
+                          "args": [
+                            1,
+                            {
+                              "op": "mul",
+                              "args": [
+                                {
+                                  "var": "mask"
+                                },
+                                0
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "exp",
+                          "args": [
+                            {
+                              "var": "s2"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "op": "add",
+                      "args": [
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s1"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s2"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    1
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s3"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    1
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s4"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "div",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "sub",
+                          "args": [
+                            1,
+                            {
+                              "op": "mul",
+                              "args": [
+                                {
+                                  "var": "mask"
+                                },
+                                1
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "exp",
+                          "args": [
+                            {
+                              "var": "s3"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "op": "add",
+                      "args": [
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s1"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s2"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    1
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s3"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    1
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s4"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "div",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "sub",
+                          "args": [
+                            1,
+                            {
+                              "op": "mul",
+                              "args": [
+                                {
+                                  "var": "mask"
+                                },
+                                1
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "exp",
+                          "args": [
+                            {
+                              "var": "s4"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "op": "add",
+                      "args": [
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s1"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s2"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    1
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s3"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    1
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s4"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              [
+                {
+                  "op": "div",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "sub",
+                          "args": [
+                            1,
+                            {
+                              "op": "mul",
+                              "args": [
+                                {
+                                  "var": "mask"
+                                },
+                                0
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "exp",
+                          "args": [
+                            {
+                              "var": "s1"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "op": "add",
+                      "args": [
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s1"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s2"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s3"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    1
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s4"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "div",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "sub",
+                          "args": [
+                            1,
+                            {
+                              "op": "mul",
+                              "args": [
+                                {
+                                  "var": "mask"
+                                },
+                                0
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "exp",
+                          "args": [
+                            {
+                              "var": "s2"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "op": "add",
+                      "args": [
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s1"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s2"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s3"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    1
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s4"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "div",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "sub",
+                          "args": [
+                            1,
+                            {
+                              "op": "mul",
+                              "args": [
+                                {
+                                  "var": "mask"
+                                },
+                                0
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "exp",
+                          "args": [
+                            {
+                              "var": "s3"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "op": "add",
+                      "args": [
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s1"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s2"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s3"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    1
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s4"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "div",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "sub",
+                          "args": [
+                            1,
+                            {
+                              "op": "mul",
+                              "args": [
+                                {
+                                  "var": "mask"
+                                },
+                                1
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "exp",
+                          "args": [
+                            {
+                              "var": "s4"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "op": "add",
+                      "args": [
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s1"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s2"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s3"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    1
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s4"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              [
+                {
+                  "op": "div",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "sub",
+                          "args": [
+                            1,
+                            {
+                              "op": "mul",
+                              "args": [
+                                {
+                                  "var": "mask"
+                                },
+                                0
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "exp",
+                          "args": [
+                            {
+                              "var": "s1"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "op": "add",
+                      "args": [
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s1"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s2"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s3"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s4"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "div",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "sub",
+                          "args": [
+                            1,
+                            {
+                              "op": "mul",
+                              "args": [
+                                {
+                                  "var": "mask"
+                                },
+                                0
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "exp",
+                          "args": [
+                            {
+                              "var": "s2"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "op": "add",
+                      "args": [
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s1"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s2"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s3"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s4"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "div",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "sub",
+                          "args": [
+                            1,
+                            {
+                              "op": "mul",
+                              "args": [
+                                {
+                                  "var": "mask"
+                                },
+                                0
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "exp",
+                          "args": [
+                            {
+                              "var": "s3"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "op": "add",
+                      "args": [
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s1"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s2"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s3"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s4"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "div",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "sub",
+                          "args": [
+                            1,
+                            {
+                              "op": "mul",
+                              "args": [
+                                {
+                                  "var": "mask"
+                                },
+                                0
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "exp",
+                          "args": [
+                            {
+                              "var": "s4"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "op": "add",
+                      "args": [
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s1"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s2"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s3"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "sub",
+                              "args": [
+                                1,
+                                {
+                                  "op": "mul",
+                                  "args": [
+                                    {
+                                      "var": "mask"
+                                    },
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "op": "exp",
+                              "args": [
+                                {
+                                  "var": "s4"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            ],
+            "row_labels": [
+              "Row 1",
+              "Row 2",
+              "Row 3",
+              "Row 4"
+            ],
+            "column_labels": [
+              "Key 1",
+              "Key 2",
+              "Key 3",
+              "Key 4"
+            ],
+            "min": 0,
+            "max": 1,
+            "active_row": {
+              "op": "sub",
+              "args": [
+                {
+                  "var": "row"
+                },
+                1
+              ]
+            },
+            "reveal": {
+              "title": "Causal attention matrix",
+              "text": "A query row may read itself and earlier decoder input positions. Masking removes later columns before normalization. This matrix uses the same toy key scores in every row to isolate that effect.",
+              "block_id": "attention-evidence-3"
+            }
+          },
+          {
+            "id": "selected-row",
+            "type": "text",
+            "x": 598,
+            "y": 119,
+            "text": "QUERY ROW {{row:0}}",
+            "font_size": 17,
+            "fill": "#dbb577"
+          },
+          {
+            "id": "future",
+            "type": "text",
+            "x": 598,
+            "y": 177,
+            "text": "Future attention: {{future_mass:3}}",
+            "font_size": 20,
+            "fill": "#86debd"
+          },
+          {
+            "id": "third",
+            "type": "text",
+            "x": 598,
+            "y": 226,
+            "text": "Weight on key 3: {{w3:3}}",
+            "font_size": 18,
+            "fill": "#e9edf1"
+          },
+          {
+            "id": "payload",
+            "type": "text",
+            "x": 598,
+            "y": 273,
+            "text": "Key 3 value: {{key3_value:1}}",
+            "font_size": 18,
+            "fill": "#e9edf1"
+          },
+          {
+            "id": "output",
+            "type": "text",
+            "x": 598,
+            "y": 330,
+            "text": "Output: {{result:3}}",
+            "font_size": 26,
+            "fill": "#dbb577"
+          },
+          {
+            "id": "challenge-bg",
+            "type": "rect",
+            "x": 35,
+            "y": 452,
+            "width": 890,
+            "height": 58,
+            "rx": 10,
+            "fill": "#182630"
+          },
+          {
+            "id": "challenge",
+            "type": "text",
+            "x": 54,
+            "y": 487,
+            "text": "Try to make a future token matter. Then switch the mask off.",
+            "font_size": 19,
+            "fill": "#e9edf1"
+          },
+          {
+            "id": "mask-note",
+            "type": "text",
+            "x": 130,
+            "y": 439,
+            "text": "Rows are queries. Columns are available keys.",
+            "font_size": 15,
+            "fill": "#b2c4cd"
+          }
+        ],
+        "keyframes": []
+      },
+      "steps": [
+        {
+          "time": 0,
+          "title": "Read only the prefix",
+          "text": "With row 2 selected, keys 3 and 4 are excluded. Their weights are exactly zero."
+        },
+        {
+          "time": 0.45,
+          "title": "Try to leak information",
+          "text": "Change key 3’s score and value. With the mask on, neither can affect this row’s weighted output. The cursor visits each key; the numeric weights show whether its payload can enter the answer."
+        },
+        {
+          "time": 1,
+          "title": "Remove the protection",
+          "text": "Switch the mask off. Now a future key can acquire weight and inject its payload into the current output."
+        }
+      ],
+      "presets": [
+        {
+          "id": "sealed",
+          "title": "Seal the future",
+          "description": "A very attractive future key still contributes exactly zero.",
+          "parameters": {
+            "mask": 1,
+            "row": 2,
+            "key3_score": 4,
+            "key3_value": 20
+          }
+        },
+        {
+          "id": "leak",
+          "title": "Break the seal",
+          "description": "The same future key becomes visible when the mask is disabled.",
+          "parameters": {
+            "mask": 0,
+            "row": 2,
+            "key3_score": 4,
+            "key3_value": 20
+          }
+        },
+        {
+          "id": "allowed",
+          "title": "Move forward in time",
+          "description": "By row 3, key 3 is available and can contribute legitimately.",
+          "parameters": {
+            "mask": 1,
+            "row": 3,
+            "key3_score": 4,
+            "key3_value": 20
+          }
+        }
+      ]
+    },
+    {
+      "id": "multiple-heads",
+      "title": "Several views can survive the same lookup",
+      "section_id": "attention-4",
+      "source_anchors": [
+        {
+          "block_id": "attention-evidence-4",
+          "relation": "illustrates"
+        }
+      ],
+      "explanation": "One attention head returns one weighted mixture. The paper projects queries, keys and values through different learned matrices and runs attention in parallel. The separate results are concatenated and projected again. In this two-head toy, changing the separation control rotates head B’s query from head A’s direction toward the second key component. Compare the two actual weight distributions. Then change the final projection coefficients and watch how the two payload mixtures combine. The separate value payloads remind us that each head also has its own value projection.",
+      "narration": "One attention head returns one weighted mixture. The paper projects queries, keys and values through different learned matrices and runs attention in parallel. The separate results are concatenated and projected again. In this two-head toy, changing the separation control rotates head B’s query from head A’s direction toward the second key component. Compare the two actual weight distributions. Then change the final projection coefficients and watch how the two payload mixtures combine. The separate value payloads remind us that each head also has its own value projection.",
+      "alt_text": "One attention head returns one weighted mixture. The paper projects queries, keys and values through different learned matrices and runs attention in parallel. The separate results are concatenated and projected again. In this two-head toy, changing the separation control rotates head B’s query from head A’s direction toward the second key component. Compare the two actual weight distributions. Then change the final projection coefficients and watch how the two payload mixtures combine. The separate value payloads remind us that each head also has its own value projection. The visual readouts give the calculated values; controls let you change the described quantities.",
+      "assumptions": [
+        "The river/bank/loan numbers are an invented geometric example, not an analysis of named linguistic roles in trained attention heads.",
+        "The paper uses eight heads with 64-dimensional key/value spaces in its base configuration. This toy shows two heads and scalar output payloads.",
+        "The adjustable query direction and output coefficients stand in for learned linear projections. They are not trained inside this scene.",
+        "At zero separation the weighting patterns coincide, while outputs may still differ because the value projections are different."
+      ],
+      "duration": 20,
+      "controls": [
+        {
+          "id": "separation",
+          "label": "Head B view: same direction to second component",
+          "type": "range",
+          "min": 0,
+          "max": 1,
+          "default": 1,
+          "step": 0.05
+        },
+        {
+          "id": "mixA",
+          "label": "Final projection coefficient for head A",
+          "type": "range",
+          "min": -1,
+          "max": 1,
+          "default": 0.5,
+          "step": 0.1
+        },
+        {
+          "id": "mixB",
+          "label": "Final projection coefficient for head B",
+          "type": "range",
+          "min": -1,
+          "max": 1,
+          "default": 0.5,
+          "step": 0.1
+        }
+      ],
+      "variables": {
+        "qa": 1,
+        "qb_x": {
+          "op": "sub",
+          "args": [
+            1,
+            {
+              "var": "separation"
+            }
+          ]
+        },
+        "qb_y": {
+          "var": "separation"
+        },
+        "Ae1": {
+          "op": "exp",
+          "args": [
+            {
+              "op": "div",
+              "args": [
+                2,
+                1.4142135623730951
+              ]
+            }
+          ]
+        },
+        "Ae2": {
+          "op": "exp",
+          "args": [
+            {
+              "op": "div",
+              "args": [
+                1,
+                1.4142135623730951
+              ]
+            }
+          ]
+        },
+        "Ae3": {
+          "op": "exp",
+          "args": [
+            {
+              "op": "div",
+              "args": [
+                0,
+                1.4142135623730951
+              ]
+            }
+          ]
+        },
+        "AZ": {
+          "op": "add",
+          "args": [
+            {
+              "var": "Ae1"
+            },
+            {
+              "var": "Ae2"
+            },
+            {
+              "var": "Ae3"
+            }
+          ]
+        },
+        "Aw1": {
+          "op": "div",
+          "args": [
+            {
+              "var": "Ae1"
+            },
+            {
+              "var": "AZ"
+            }
+          ]
+        },
+        "Aw2": {
+          "op": "div",
+          "args": [
+            {
+              "var": "Ae2"
+            },
+            {
+              "var": "AZ"
+            }
+          ]
+        },
+        "Aw3": {
+          "op": "div",
+          "args": [
+            {
+              "var": "Ae3"
+            },
+            {
+              "var": "AZ"
+            }
+          ]
+        },
+        "Be1": {
+          "op": "exp",
+          "args": [
+            {
+              "op": "div",
+              "args": [
+                {
+                  "op": "add",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "var": "qb_x"
+                        },
+                        2
+                      ]
+                    },
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "var": "qb_y"
+                        },
+                        0
+                      ]
+                    }
+                  ]
+                },
+                1.4142135623730951
+              ]
+            }
+          ]
+        },
+        "Be2": {
+          "op": "exp",
+          "args": [
+            {
+              "op": "div",
+              "args": [
+                {
+                  "op": "add",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "var": "qb_x"
+                        },
+                        1
+                      ]
+                    },
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "var": "qb_y"
+                        },
+                        1
+                      ]
+                    }
+                  ]
+                },
+                1.4142135623730951
+              ]
+            }
+          ]
+        },
+        "Be3": {
+          "op": "exp",
+          "args": [
+            {
+              "op": "div",
+              "args": [
+                {
+                  "op": "add",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "var": "qb_x"
+                        },
+                        0
+                      ]
+                    },
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "var": "qb_y"
+                        },
+                        2
+                      ]
+                    }
+                  ]
+                },
+                1.4142135623730951
+              ]
+            }
+          ]
+        },
+        "BZ": {
+          "op": "add",
+          "args": [
+            {
+              "var": "Be1"
+            },
+            {
+              "var": "Be2"
+            },
+            {
+              "var": "Be3"
+            }
+          ]
+        },
+        "Bw1": {
+          "op": "div",
+          "args": [
+            {
+              "var": "Be1"
+            },
+            {
+              "var": "BZ"
+            }
+          ]
+        },
+        "Bw2": {
+          "op": "div",
+          "args": [
+            {
+              "var": "Be2"
+            },
+            {
+              "var": "BZ"
+            }
+          ]
+        },
+        "Bw3": {
+          "op": "div",
+          "args": [
+            {
+              "var": "Be3"
+            },
+            {
+              "var": "BZ"
+            }
+          ]
+        },
+        "outA": {
+          "op": "add",
+          "args": [
+            {
+              "op": "mul",
+              "args": [
+                3,
+                {
+                  "var": "Aw1"
+                }
+              ]
+            },
+            {
+              "var": "Aw2"
+            }
+          ]
+        },
+        "outB": {
+          "op": "add",
+          "args": [
+            {
+              "var": "Bw2"
+            },
+            {
+              "op": "mul",
+              "args": [
+                4,
+                {
+                  "var": "Bw3"
+                }
+              ]
+            }
+          ]
+        },
+        "projected": {
+          "op": "add",
+          "args": [
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "var": "mixA"
+                },
+                {
+                  "var": "outA"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "var": "mixB"
+                },
+                {
+                  "var": "outB"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "visual": {
+        "width": 800,
+        "height": 500,
+        "objects": [
+          {
+            "id": "heads-h",
+            "type": "text",
+            "x": 26,
+            "y": 28,
+            "text": "Same input positions. Different learned views. Parallel mixtures.",
+            "font_size": 20,
+            "fill": "#edf2f7"
+          },
+          {
+            "id": "heads-sub",
+            "type": "text",
+            "x": 28,
+            "y": 65,
+            "text": "Toy token keys: river [2,0]     bank [1,1]     loan [0,2]",
+            "font_size": 17,
+            "fill": "#b9c7d8"
+          },
+          {
+            "id": "a-title",
+            "type": "text",
+            "x": 45,
+            "y": 111,
+            "text": "Head A: query [1,0]",
+            "font_size": 18,
+            "fill": "#69d8ba"
+          },
+          {
+            "id": "b-title",
+            "type": "text",
+            "x": 437,
+            "y": 111,
+            "text": "Head B: [{{qb_x:1}}, {{qb_y:1}}]",
+            "font_size": 18,
+            "fill": "#f3b86d"
+          },
+          {
+            "id": "a-weights",
+            "type": "bars",
+            "x": 45,
+            "y": 140,
+            "width": 310,
+            "height": 145,
+            "values": [
+              {
+                "var": "Aw1"
+              },
+              {
+                "var": "Aw2"
+              },
+              {
+                "var": "Aw3"
+              }
+            ],
+            "labels": [
+              "river",
+              "bank",
+              "loan"
+            ],
+            "max": 1,
+            "fill": "#69d8ba"
+          },
+          {
+            "id": "b-weights",
+            "type": "bars",
+            "x": 437,
+            "y": 140,
+            "width": 310,
+            "height": 145,
+            "values": [
+              {
+                "var": "Bw1"
+              },
+              {
+                "var": "Bw2"
+              },
+              {
+                "var": "Bw3"
+              }
+            ],
+            "labels": [
+              "river",
+              "bank",
+              "loan"
+            ],
+            "max": 1,
+            "fill": "#f3b86d"
+          },
+          {
+            "id": "a-values",
+            "type": "text",
+            "x": 43,
+            "y": 325,
+            "text": "Value payloads A: [3,1,0]",
+            "font_size": 16,
+            "fill": "#edf2f7"
+          },
+          {
+            "id": "b-values",
+            "type": "text",
+            "x": 438,
+            "y": 325,
+            "text": "Value payloads B: [0,1,4]",
+            "font_size": 16,
+            "fill": "#edf2f7"
+          },
+          {
+            "id": "a-concat",
+            "type": "arrow",
+            "x1": 200,
+            "y1": 341,
+            "x2": 320,
+            "y2": 375,
+            "stroke": "#69d8ba",
+            "stroke_width": 2
+          },
+          {
+            "id": "b-concat",
+            "type": "arrow",
+            "x1": 590,
+            "y1": 341,
+            "x2": 470,
+            "y2": 375,
+            "stroke": "#f3b86d",
+            "stroke_width": 2
+          },
+          {
+            "id": "concat",
+            "type": "rect",
+            "x": 250,
+            "y": 375,
+            "width": 300,
+            "height": 43,
+            "rx": 8,
+            "fill": "#233d48"
+          },
+          {
+            "id": "concat-value",
+            "type": "text",
+            "x": 270,
+            "y": 403,
+            "text": "Concatenate: [{{outA:3}}, {{outB:3}}]",
+            "font_size": 17,
+            "fill": "#edf2f7"
+          },
+          {
+            "id": "projected",
+            "type": "text",
+            "x": 58,
+            "y": 464,
+            "text": "Output projection: {{mixA:1}} × head A + {{mixB:1}} × head B = {{projected:3}}",
+            "font_size": 17,
+            "fill": "#edf2f7"
+          },
+          {
+            "id": "head-a-path",
+            "type": "circle",
+            "cx": 195,
+            "cy": 119,
+            "r": 5,
+            "fill": "#69d8ba"
+          },
+          {
+            "id": "head-b-path",
+            "type": "circle",
+            "cx": 587,
+            "cy": 119,
+            "r": 5,
+            "fill": "#f3b86d"
+          }
+        ],
+        "keyframes": [
+          {
+            "time": 0,
+            "object_id": "head-a-path",
+            "props": {
+              "cx": 195,
+              "cy": 119
+            }
+          },
+          {
+            "time": 0.55,
+            "object_id": "head-a-path",
+            "props": {
+              "cx": 195,
+              "cy": 319
+            }
+          },
+          {
+            "time": 0.8,
+            "object_id": "head-a-path",
+            "props": {
+              "cx": 325,
+              "cy": 372
+            }
+          },
+          {
+            "time": 1,
+            "object_id": "head-a-path",
+            "props": {
+              "cx": 325,
+              "cy": 431
+            }
+          },
+          {
+            "time": 0,
+            "object_id": "head-b-path",
+            "props": {
+              "cx": 587,
+              "cy": 119
+            }
+          },
+          {
+            "time": 0.55,
+            "object_id": "head-b-path",
+            "props": {
+              "cx": 587,
+              "cy": 319
+            }
+          },
+          {
+            "time": 0.8,
+            "object_id": "head-b-path",
+            "props": {
+              "cx": 475,
+              "cy": 372
+            }
+          },
+          {
+            "time": 1,
+            "object_id": "head-b-path",
+            "props": {
+              "cx": 475,
+              "cy": 431
+            }
+          }
+        ]
+      },
+      "steps": [
+        {
+          "time": 0,
+          "title": "Compare the views",
+          "text": "Head A favors the first component of the toy keys. At full separation, head B favors the second."
+        },
+        {
+          "time": 0.4,
+          "title": "Keep separate payloads",
+          "text": "Each head calculates its own weighted value. Concatenation preserves them side by side rather than averaging them immediately."
+        },
+        {
+          "time": 1,
+          "title": "Project the combined result",
+          "text": "The final learned projection decides how the separate outputs contribute to the next representation. Try identical weighting patterns and different payload projections."
+        }
+      ],
+      "presets": [
+        {
+          "id": "same",
+          "title": "Same view twice",
+          "parameters": {
+            "separation": 0,
+            "mixA": 0.5,
+            "mixB": 0.5
+          }
+        },
+        {
+          "id": "different",
+          "title": "Complementary views",
+          "parameters": {
+            "separation": 1,
+            "mixA": 0.5,
+            "mixB": 0.5
+          }
+        }
+      ]
+    },
+    {
+      "id": "position-encoding",
+      "title": "Give each position a usable numerical signature",
+      "section_id": "attention-5",
+      "source_anchors": [
+        {
+          "block_id": "attention-evidence-5",
+          "relation": "illustrates"
+        }
+      ],
+      "explanation": "Attention needs information about sequence order. This paper adds a positional vector to each token embedding, using paired sine and cosine waves at several frequencies. A pair is like a clock hand: shifting position rotates it. The scene computes the paper’s formula directly, using a small eight-dimensional example with four frequency pairs. Play moves the active position by the selected offset. The second readout recomputes the same pair as a linear combination of its original sine and cosine values. This is the fixed-offset property the authors discuss. Adding these values to an embedding makes position available to later learned operations; it does not force the model to use position correctly.",
+      "narration": "Attention needs information about sequence order. This paper adds a positional vector to each token embedding, using paired sine and cosine waves at several frequencies. A pair is like a clock hand: shifting position rotates it. The scene computes the paper’s formula directly, using a small eight-dimensional example with four frequency pairs. Play moves the active position by the selected offset. The second readout recomputes the same pair as a linear combination of its original sine and cosine values. This is the fixed-offset property the authors discuss. Adding these values to an embedding makes position available to later learned operations; it does not force the model to use position correctly.",
+      "alt_text": "Attention needs information about sequence order. This paper adds a positional vector to each token embedding, using paired sine and cosine waves at several frequencies. A pair is like a clock hand: shifting position rotates it. The scene computes the paper’s formula directly, using a small eight-dimensional example with four frequency pairs. Play moves the active position by the selected offset. The second readout recomputes the same pair as a linear combination of its original sine and cosine values. This is the fixed-offset property the authors discuss. Adding these values to an embedding makes position available to later learned operations; it does not force the model to use position correctly. The visual readouts give the calculated values; controls let you change the described quantities.",
+      "assumptions": [
+        "This illustration uses d_model=8 so that four frequency pairs can be explored. The paper’s base model uses d_model=512.",
+        "The two displayed embedding components are invented values, not learned embeddings from the paper.",
+        "Only one sine/cosine pair is shown at a time; a full positional vector concatenates pairs at different frequencies.",
+        "The authors motivate possible extrapolation to longer sequences and report similar results with learned positions. The display is not evidence of unlimited length generalization."
+      ],
+      "duration": 20,
+      "controls": [
+        {
+          "id": "position",
+          "label": "Base token position",
+          "type": "range",
+          "min": 0,
+          "max": 128,
+          "default": 12,
+          "step": 1
+        },
+        {
+          "id": "offset",
+          "label": "Position offset to explore",
+          "type": "range",
+          "min": 0,
+          "max": 32,
+          "default": 4,
+          "step": 1
+        },
+        {
+          "id": "pair",
+          "label": "Frequency pair in an 8D encoding",
+          "type": "select",
+          "default": 0,
+          "options": [
+            {
+              "value": 0,
+              "label": "Pair 0"
+            },
+            {
+              "value": 1,
+              "label": "Pair 1"
+            },
+            {
+              "value": 2,
+              "label": "Pair 2"
+            },
+            {
+              "value": 3,
+              "label": "Pair 3"
+            }
+          ]
+        }
+      ],
+      "variables": {
+        "scale": {
+          "op": "pow",
+          "args": [
+            10000,
+            {
+              "op": "div",
+              "args": [
+                {
+                  "op": "mul",
+                  "args": [
+                    2,
+                    {
+                      "var": "pair"
+                    }
+                  ]
+                },
+                8
+              ]
+            }
+          ]
+        },
+        "delta": {
+          "op": "div",
+          "args": [
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "var": "t"
+                },
+                {
+                  "var": "offset"
+                }
+              ]
+            },
+            {
+              "var": "scale"
+            }
+          ]
+        },
+        "phase": {
+          "op": "div",
+          "args": [
+            {
+              "var": "position"
+            },
+            {
+              "var": "scale"
+            }
+          ]
+        },
+        "sine": {
+          "op": "sin",
+          "args": [
+            {
+              "var": "phase"
+            }
+          ]
+        },
+        "cosine": {
+          "op": "cos",
+          "args": [
+            {
+              "var": "phase"
+            }
+          ]
+        },
+        "active_position": {
+          "op": "add",
+          "args": [
+            {
+              "var": "position"
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "var": "t"
+                },
+                {
+                  "var": "offset"
+                }
+              ]
+            }
+          ]
+        },
+        "shift_s": {
+          "op": "sin",
+          "args": [
+            {
+              "op": "add",
+              "args": [
+                {
+                  "var": "phase"
+                },
+                {
+                  "var": "delta"
+                }
+              ]
+            }
+          ]
+        },
+        "shift_c": {
+          "op": "cos",
+          "args": [
+            {
+              "op": "add",
+              "args": [
+                {
+                  "var": "phase"
+                },
+                {
+                  "var": "delta"
+                }
+              ]
+            }
+          ]
+        },
+        "linear_s": {
+          "op": "add",
+          "args": [
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "var": "sine"
+                },
+                {
+                  "op": "cos",
+                  "args": [
+                    {
+                      "var": "delta"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "var": "cosine"
+                },
+                {
+                  "op": "sin",
+                  "args": [
+                    {
+                      "var": "delta"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "linear_c": {
+          "op": "sub",
+          "args": [
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "var": "cosine"
+                },
+                {
+                  "op": "cos",
+                  "args": [
+                    {
+                      "var": "delta"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "var": "sine"
+                },
+                {
+                  "op": "sin",
+                  "args": [
+                    {
+                      "var": "delta"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "encoded1": {
+          "op": "add",
+          "args": [
+            0.25,
+            {
+              "var": "shift_s"
+            }
+          ]
+        },
+        "encoded2": {
+          "op": "add",
+          "args": [
+            -0.5,
+            {
+              "var": "shift_c"
+            }
+          ]
+        }
+      },
+      "visual": {
+        "width": 800,
+        "height": 500,
+        "objects": [
+          {
+            "id": "position-h",
+            "type": "text",
+            "x": 26,
+            "y": 28,
+            "text": "Order becomes a numeric pattern added to each token vector.",
+            "font_size": 20,
+            "fill": "#edf2f7"
+          },
+          {
+            "id": "phase-circle",
+            "type": "circle",
+            "cx": 180,
+            "cy": 185,
+            "r": 100,
+            "fill": "none",
+            "stroke": "#405364",
+            "stroke_width": 2
+          },
+          {
+            "id": "base-phase",
+            "type": "arrow",
+            "x1": 180,
+            "y1": 185,
+            "x2": {
+              "op": "add",
+              "args": [
+                180,
+                {
+                  "op": "mul",
+                  "args": [
+                    100,
+                    {
+                      "var": "cosine"
+                    }
+                  ]
+                }
+              ]
+            },
+            "y2": {
+              "op": "sub",
+              "args": [
+                185,
+                {
+                  "op": "mul",
+                  "args": [
+                    100,
+                    {
+                      "var": "sine"
+                    }
+                  ]
+                }
+              ]
+            },
+            "stroke": "#8192a5",
+            "stroke_width": 2
+          },
+          {
+            "id": "shift-phase",
+            "type": "arrow",
+            "x1": 180,
+            "y1": 185,
+            "x2": {
+              "op": "add",
+              "args": [
+                180,
+                {
+                  "op": "mul",
+                  "args": [
+                    100,
+                    {
+                      "var": "shift_c"
+                    }
+                  ]
+                }
+              ]
+            },
+            "y2": {
+              "op": "sub",
+              "args": [
+                185,
+                {
+                  "op": "mul",
+                  "args": [
+                    100,
+                    {
+                      "var": "shift_s"
+                    }
+                  ]
+                }
+              ]
+            },
+            "stroke": "#69d8ba",
+            "stroke_width": 2
+          },
+          {
+            "id": "pair-label",
+            "type": "text",
+            "x": 53,
+            "y": 325,
+            "text": "Frequency pair i = {{pair}}",
+            "font_size": 17,
+            "fill": "#edf2f7"
+          },
+          {
+            "id": "denom-label",
+            "type": "text",
+            "x": 53,
+            "y": 355,
+            "text": "Wavelength scale = {{scale:1}}",
+            "font_size": 17,
+            "fill": "#b9c7d8"
+          },
+          {
+            "id": "sine-wave",
+            "type": "plot",
+            "x": 410,
+            "y": 100,
+            "width": 340,
+            "height": 170,
+            "x_min": 0,
+            "x_max": 160,
+            "y_min": -1.1,
+            "y_max": 1.1,
+            "expr": {
+              "op": "sin",
+              "args": [
+                {
+                  "op": "div",
+                  "args": [
+                    {
+                      "var": "x"
+                    },
+                    {
+                      "var": "scale"
+                    }
+                  ]
+                }
+              ]
+            },
+            "samples": 512,
+            "stroke": "#69d8ba",
+            "stroke_width": 2
+          },
+          {
+            "id": "cosine-wave",
+            "type": "plot",
+            "x": 410,
+            "y": 100,
+            "width": 340,
+            "height": 170,
+            "x_min": 0,
+            "x_max": 160,
+            "y_min": -1.1,
+            "y_max": 1.1,
+            "expr": {
+              "op": "cos",
+              "args": [
+                {
+                  "op": "div",
+                  "args": [
+                    {
+                      "var": "x"
+                    },
+                    {
+                      "var": "scale"
+                    }
+                  ]
+                }
+              ]
+            },
+            "samples": 512,
+            "stroke": "#f3b86d",
+            "stroke_width": 2
+          },
+          {
+            "id": "position-dot",
+            "type": "circle",
+            "cx": {
+              "op": "add",
+              "args": [
+                410,
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "div",
+                      "args": [
+                        340,
+                        160
+                      ]
+                    },
+                    {
+                      "var": "active_position"
+                    }
+                  ]
+                }
+              ]
+            },
+            "cy": {
+              "op": "sub",
+              "args": [
+                270,
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "div",
+                      "args": [
+                        170,
+                        2.2
+                      ]
+                    },
+                    {
+                      "op": "add",
+                      "args": [
+                        {
+                          "var": "shift_s"
+                        },
+                        1.1
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "r": 5,
+            "fill": "#edf2f7"
+          },
+          {
+            "id": "wave-label",
+            "type": "text",
+            "x": 413,
+            "y": 298,
+            "text": "sin / cos across token positions 0–160",
+            "font_size": 15,
+            "fill": "#b9c7d8"
+          },
+          {
+            "id": "position-label",
+            "type": "text",
+            "x": 410,
+            "y": 338,
+            "text": "Active position = {{active_position:1}}",
+            "font_size": 17,
+            "fill": "#edf2f7"
+          },
+          {
+            "id": "pair-values",
+            "type": "text",
+            "x": 410,
+            "y": 370,
+            "text": "Encoding = [{{shift_s:3}}, {{shift_c:3}}]",
+            "font_size": 16,
+            "fill": "#edf2f7"
+          },
+          {
+            "id": "sum-values",
+            "type": "text",
+            "x": 30,
+            "y": 416,
+            "text": "Toy embedding [0.25,-0.5] + encoding = [{{encoded1:3}}, {{encoded2:3}}]",
+            "font_size": 17,
+            "fill": "#edf2f7"
+          },
+          {
+            "id": "shift-check",
+            "type": "text",
+            "x": 30,
+            "y": 455,
+            "text": "Computed by a rotation too: [{{linear_s:3}}, {{linear_c:3}}]",
+            "font_size": 17,
+            "fill": "#edf2f7"
+          },
+          {
+            "id": "position-note",
+            "type": "text",
+            "x": 30,
+            "y": 486,
+            "text": "Play moves from the base position to base + offset. Select another frequency pair.",
+            "font_size": 15,
+            "fill": "#b9c7d8"
+          }
+        ],
+        "keyframes": []
+      },
+      "steps": [
+        {
+          "time": 0,
+          "title": "Start from a position",
+          "text": "The gray arrow marks the base position in this frequency pair. Other pairs use different wavelengths."
+        },
+        {
+          "time": 0.4,
+          "title": "Move by an offset",
+          "text": "The active position rotates the pair. The sine and cosine traces show the same values against sequence position."
+        },
+        {
+          "time": 1,
+          "title": "Translate a relative displacement",
+          "text": "Compare the direct formula with the rotation readout. A fixed positional offset is a linear transformation of the original pair; learned attention can use that structure."
+        }
+      ],
+      "presets": [
+        {
+          "id": "fast",
+          "title": "Fast wave",
+          "parameters": {
+            "position": 12,
+            "offset": 4,
+            "pair": 0
+          }
+        },
+        {
+          "id": "slow",
+          "title": "Slow wave",
+          "parameters": {
+            "position": 12,
+            "offset": 4,
+            "pair": 3
+          }
+        }
+      ]
+    }
+  ]
+}

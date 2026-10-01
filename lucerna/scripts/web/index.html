@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark"><title>Lucerna — an instrument for understanding</title>
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/katex/katex.min.css">
+<link rel="stylesheet" href="/theme-forms.css">
+<script defer src="/katex/katex.min.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to the workspace</a>
+<header class="app-header">
+<select id="theme-select" aria-label="Visual skin"><option value="lamplight">LAMPLIGHT</option><option value="aperture">APERTURE</option><option value="margin">MARGIN</option></select>
+<a class="brand" href="#library" aria-label="Lucerna library"><span class="brand-mark" aria-hidden="true">L</span><span>LUCERNA<small>AN INSTRUMENT FOR UNDERSTANDING</small></span></a>
+<nav aria-label="Workspace"><a href="#library" id="library-nav">Library</a><a href="#pathways" id="pathways-nav">Learning paths</a></nav>
+<div class="header-tools"><button id="search-open" class="search-command" type="button">Search your sources <kbd>Ctrl K</kbd></button><select id="learner-select" aria-label="Current learner"></select><button id="requests-open" class="quiet" type="button">Questions</button><button id="import-open" class="primary" type="button">+ Add source</button></div>
+</header>
+<div id="connection" class="connection" role="status" hidden></div>
+<main id="main" tabindex="-1"><div class="loading"><span class="loading-lens" aria-hidden="true"></span>Opening your workspace…</div></main>
+<div id="save-status" role="status" class="save-status" aria-live="polite"></div>
+<dialog id="import-dialog"><form id="import-form">
+<div class="dialog-heading"><div><p class="eyebrow">ADD TO YOUR LIBRARY</p><h2>Bring a source into focus.</h2></div><button type="button" id="import-close" class="icon-button" aria-label="Close import">×</button></div>
+<p class="muted">Papers, books, chapters, and the passage that made you stop.</p>
+<label for="import-source">arXiv link or paper ID</label><input id="import-source" name="source" placeholder="https://arxiv.org/abs/…">
+<div class="or-label"><span>OR A SOURCE YOU HAVE</span></div>
+<label for="import-file">PDF, Markdown, HTML, or text file</label><input id="import-file" type="file" accept=".pdf,.md,.txt,.html,.htm,.markdown">
+<label for="import-text">Paste a passage</label><textarea id="import-text" rows="4" placeholder="Keep enough context to understand the claim…"></textarea>
+<p id="import-error" class="inline-error" role="alert" hidden></p>
+<div class="dialog-footer"><small>Import preserves the source. Your teaching agent builds the explanation.</small><button id="import-submit" class="primary">Import source</button></div></form></dialog>
+<dialog id="questions-dialog" class="question-dialog"><div class="dialog-heading"><div><p class="eyebrow">THE CONVERSATION CONTINUES</p><h2>Questions & replies</h2></div><button type="button" id="questions-close" class="icon-button" aria-label="Close questions">×</button></div><div id="question-inbox"></div></dialog>
+<dialog id="search-dialog" class="search-dialog"><div class="dialog-heading"><label for="command-query">Find a thought across your sources</label><button id="search-close" type="button" class="icon-button" aria-label="Close search">×</button></div><input id="command-query" type="search" placeholder="A concept, a phrase, an author…" autocomplete="off"><div id="command-results" class="command-results"></div></dialog>
+<script type="module" src="/app.js"></script>
+</body>
+</html>

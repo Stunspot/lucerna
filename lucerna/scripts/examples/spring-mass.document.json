@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "id": "doc-7dc53f0d1f846c288afa76e8",
+  "title": "The ideal spring oscillator",
+  "source": {
+    "kind": "markdown",
+    "format": "markdown",
+    "original": "spring-mass.md",
+    "filename": "spring-mass.md",
+    "retrieved_at": "2026-09-09T05:45:43.979333+00:00",
+    "sha256": "a3e0424069eb98b110a650149215d1c4a85caf7a89a1f7baed65d29f3ae60573",
+    "cache_path": "doc-7dc53f0d1f846c288afa76e8/source.md"
+  },
+  "sections": [
+    {
+      "id": "s-2",
+      "title": "The ideal spring oscillator",
+      "level": 1,
+      "parent_id": null,
+      "blocks": [
+        {
+          "id": "b-1",
+          "kind": "paragraph",
+          "text": "This original teaching example uses a mass m attached to a Hooke-law spring of stiffness k on a frictionless horizontal surface. Displacement x is measured from equilibrium. The force is F=-kx and acceleration is -kx/m.",
+          "anchor": {
+            "line": 3,
+            "end_line": 3
+          }
+        }
+      ]
+    },
+    {
+      "id": "s-3",
+      "title": "Motion and energy",
+      "level": 2,
+      "parent_id": "s-2",
+      "blocks": [
+        {
+          "id": "b-2",
+          "kind": "paragraph",
+          "text": "Starting from rest at amplitude A, displacement is x=A cos(sqrt(k/m)t) and velocity is -A sqrt(k/m) sin(sqrt(k/m)t). The angular frequency is sqrt(k/m). Spring potential energy is kx squared divided by two, kinetic energy is mv squared divided by two, and their sum is constant at kA squared divided by two.",
+          "anchor": {
+            "line": 7,
+            "end_line": 7
+          }
+        }
+      ]
+    },
+    {
+      "id": "s-4",
+      "title": "Model boundaries",
+      "level": 2,
+      "parent_id": "s-2",
+      "blocks": [
+        {
+          "id": "b-3",
+          "kind": "paragraph",
+          "text": "The model omits friction, air resistance, spring mass and nonlinear spring response. Screen positions magnify the physical displacement and show explanatory geometry rather than a scaled engineering drawing. The animation amplitude is one distance unit.",
+          "anchor": {
+            "line": 11,
+            "end_line": 11
+          }
+        }
+      ]
+    }
+  ],
+  "warnings": [],
+  "extraction": {
+    "parser": "markdown",
+    "section_count": 3,
+    "block_count": 3,
+    "characters": 779,
+    "completeness": "structured"
+  }
+}

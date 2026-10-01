@@ -1,0 +1,362 @@
+{
+  "schema_version": 1,
+  "title": "What makes an oscillator faster?",
+  "overview": "A mass and spring make the role of stiffness, inertia and energy visible.",
+  "scenes": [
+    {
+      "id": "spring-mass",
+      "title": "Force, inertia, and a moving equilibrium",
+      "explanation": "A spring pulls toward its equilibrium position with force -kx. The mass resists acceleration, so acceleration is -kx/m. This makes angular frequency sqrt(k/m): a stiffer spring oscillates faster and a larger mass oscillates slower. The energy readouts show how spring energy trades with kinetic energy while their sum stays constant.",
+      "alt_text": "A mass slides horizontally beside an equilibrium marker. Its position and a plot follow x=A cos(sqrt(k/m) time). Readouts show displacement, angular frequency, potential energy and kinetic energy.",
+      "assumptions": [
+        "Ideal horizontal Hooke-law spring with no friction or damping.",
+        "Amplitude is 1 distance unit. Display coordinates magnify physical displacement; colors and distances on screen are illustrative."
+      ],
+      "duration": 12,
+      "controls": [
+        {
+          "id": "stiffness",
+          "label": "Spring stiffness k",
+          "type": "range",
+          "min": 1,
+          "max": 9,
+          "step": 0.5,
+          "default": 4
+        },
+        {
+          "id": "mass",
+          "label": "Mass m",
+          "type": "range",
+          "min": 0.5,
+          "max": 3,
+          "step": 0.25,
+          "default": 1
+        }
+      ],
+      "variables": {
+        "omega": {
+          "op": "sqrt",
+          "args": [
+            {
+              "op": "div",
+              "args": [
+                {
+                  "var": "stiffness"
+                },
+                {
+                  "var": "mass"
+                }
+              ]
+            }
+          ]
+        },
+        "elapsed": {
+          "op": "mul",
+          "args": [
+            {
+              "var": "t"
+            },
+            6
+          ]
+        },
+        "displacement": {
+          "op": "cos",
+          "args": [
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "var": "omega"
+                },
+                {
+                  "var": "elapsed"
+                }
+              ]
+            }
+          ]
+        },
+        "velocity": {
+          "op": "mul",
+          "args": [
+            -1,
+            {
+              "var": "omega"
+            },
+            {
+              "op": "sin",
+              "args": [
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "var": "omega"
+                    },
+                    {
+                      "var": "elapsed"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "mass_x": {
+          "op": "add",
+          "args": [
+            390,
+            {
+              "op": "mul",
+              "args": [
+                140,
+                {
+                  "var": "displacement"
+                }
+              ]
+            }
+          ]
+        },
+        "potential": {
+          "op": "mul",
+          "args": [
+            0.5,
+            {
+              "var": "stiffness"
+            },
+            {
+              "op": "pow",
+              "args": [
+                {
+                  "var": "displacement"
+                },
+                2
+              ]
+            }
+          ]
+        },
+        "kinetic": {
+          "op": "mul",
+          "args": [
+            0.5,
+            {
+              "var": "mass"
+            },
+            {
+              "op": "pow",
+              "args": [
+                {
+                  "var": "velocity"
+                },
+                2
+              ]
+            }
+          ]
+        },
+        "energy": {
+          "op": "add",
+          "args": [
+            {
+              "var": "potential"
+            },
+            {
+              "var": "kinetic"
+            }
+          ]
+        }
+      },
+      "visual": {
+        "width": 800,
+        "height": 450,
+        "objects": [
+          {
+            "id": "heading",
+            "type": "text",
+            "x": 25,
+            "y": 28,
+            "font_size": 19,
+            "text": "ω = {{omega:2}}   x = {{displacement:2}}   t = {{elapsed:1}}",
+            "fill": "#edf2f7"
+          },
+          {
+            "id": "wall",
+            "type": "rect",
+            "x": 70,
+            "y": 80,
+            "width": 15,
+            "height": 110,
+            "fill": "#8192a5"
+          },
+          {
+            "id": "equilibrium",
+            "type": "line",
+            "x1": 410,
+            "y1": 70,
+            "x2": 410,
+            "y2": 195,
+            "stroke": "#8192a5"
+          },
+          {
+            "id": "spring",
+            "type": "line",
+            "x1": 85,
+            "y1": 135,
+            "x2": {
+              "var": "mass_x"
+            },
+            "y2": 135,
+            "stroke": "#69d8ba",
+            "stroke_width": 5
+          },
+          {
+            "id": "mass-body",
+            "type": "rect",
+            "x": {
+              "var": "mass_x"
+            },
+            "y": 110,
+            "width": 40,
+            "height": 50,
+            "rx": 5,
+            "fill": "#f3b86d"
+          },
+          {
+            "id": "force",
+            "type": "arrow",
+            "x1": {
+              "op": "add",
+              "args": [
+                {
+                  "var": "mass_x"
+                },
+                20
+              ]
+            },
+            "y1": 185,
+            "x2": {
+              "op": "sub",
+              "args": [
+                {
+                  "op": "add",
+                  "args": [
+                    {
+                      "var": "mass_x"
+                    },
+                    20
+                  ]
+                },
+                {
+                  "op": "mul",
+                  "args": [
+                    55,
+                    {
+                      "var": "displacement"
+                    }
+                  ]
+                }
+              ]
+            },
+            "y2": 185,
+            "stroke": "#b9a7f7",
+            "stroke_width": 3
+          },
+          {
+            "id": "energy",
+            "type": "text",
+            "x": 40,
+            "y": 240,
+            "font_size": 17,
+            "text": "Spring {{potential:2}}  +  Kinetic {{kinetic:2}}  =  Total {{energy:2}}",
+            "fill": "#edf2f7"
+          },
+          {
+            "id": "wave",
+            "type": "plot",
+            "x": 50,
+            "y": 275,
+            "width": 690,
+            "height": 115,
+            "x_min": 0,
+            "x_max": 6,
+            "y_min": -1.15,
+            "y_max": 1.15,
+            "expr": {
+              "op": "cos",
+              "args": [
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "var": "omega"
+                    },
+                    {
+                      "var": "x"
+                    }
+                  ]
+                }
+              ]
+            },
+            "stroke": "#69d8ba",
+            "stroke_width": 3,
+            "samples": 64
+          },
+          {
+            "id": "axis",
+            "type": "text",
+            "x": 50,
+            "y": 425,
+            "font_size": 16,
+            "text": "Displacement over 6 seconds. Change k or m; compare the frequency.",
+            "fill": "#b9c7d8"
+          }
+        ],
+        "keyframes": [
+          {
+            "time": 0,
+            "object_id": "equilibrium",
+            "props": {
+              "opacity": 0.35
+            }
+          },
+          {
+            "time": 0.15,
+            "object_id": "equilibrium",
+            "props": {
+              "opacity": 1
+            }
+          },
+          {
+            "time": 1,
+            "object_id": "equilibrium",
+            "props": {
+              "opacity": 1
+            }
+          }
+        ]
+      },
+      "steps": [
+        {
+          "time": 0,
+          "title": "Start from a stretch",
+          "text": "The model starts at maximum displacement with zero velocity and all energy in the spring."
+        },
+        {
+          "time": 0.33,
+          "title": "Follow the energy",
+          "text": "Scrub until the mass crosses the equilibrium marker. Kinetic energy peaks there, while spring energy falls to zero."
+        },
+        {
+          "time": 0.67,
+          "title": "Change the timing",
+          "text": "Try a heavier mass or a stiffer spring. Watch how frequency changes and check that total energy stays constant."
+        }
+      ],
+      "narration": "A spring pulls toward its equilibrium position with force -kx. The mass resists acceleration, so acceleration is -kx/m. This makes angular frequency sqrt(k/m): a stiffer spring oscillates faster and a larger mass oscillates slower. The energy readouts show how spring energy trades with kinetic energy while their sum stays constant.",
+      "source_anchors": [
+        {
+          "block_id": "b-2",
+          "relation": "illustrates"
+        }
+      ],
+      "section_id": "s-3"
+    }
+  ]
+}

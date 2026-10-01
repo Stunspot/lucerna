@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "id": "doc-662307c41b30d663c8c09761",
+  "title": "Dynamic chemical equilibrium",
+  "source": {
+    "kind": "markdown",
+    "format": "markdown",
+    "original": "dynamic-equilibrium.md",
+    "filename": "dynamic-equilibrium.md",
+    "retrieved_at": "2026-09-09T05:45:43.976785+00:00",
+    "sha256": "2dfccc1a530187c3f9e9fb471da28510952e73b722c29939ee5e5afb0a528151",
+    "cache_path": "doc-662307c41b30d663c8c09761/source.md"
+  },
+  "sections": [
+    {
+      "id": "s-2",
+      "title": "Dynamic chemical equilibrium",
+      "level": 1,
+      "parent_id": null,
+      "blocks": [
+        {
+          "id": "b-1",
+          "kind": "paragraph",
+          "text": "This original teaching example models a well-mixed reversible first-order reaction A to B and B to A. The forward reaction rate is kf[A] and the reverse reaction rate is kr[B]. Total concentration [A]+[B] is conserved.",
+          "anchor": {
+            "line": 3,
+            "end_line": 3
+          }
+        }
+      ]
+    },
+    {
+      "id": "s-3",
+      "title": "The mechanism",
+      "level": 2,
+      "parent_id": "s-2",
+      "blocks": [
+        {
+          "id": "b-2",
+          "kind": "paragraph",
+          "text": "Starting with concentration one of A and zero of B, the B fraction at time t is kf/(kf+kr) times (1-exp(-(kf+kr)t)). At equilibrium the forward and reverse rates are equal and generally nonzero. The equilibrium B fraction is kf/(kf+kr). Increasing both rate constants by the same factor preserves equilibrium composition and changes the rate of approach.",
+          "anchor": {
+            "line": 7,
+            "end_line": 7
+          }
+        }
+      ]
+    },
+    {
+      "id": "s-4",
+      "title": "Model boundaries",
+      "level": 2,
+      "parent_id": "s-2",
+      "blocks": [
+        {
+          "id": "b-3",
+          "kind": "paragraph",
+          "text": "This is an illustrative single-step kinetic model, not a claim about the elementary mechanism of every chemical reaction. Temperature, total concentration, mixing and volume stay fixed. Concentrations use arbitrary consistent units.",
+          "anchor": {
+            "line": 11,
+            "end_line": 11
+          }
+        }
+      ]
+    }
+  ],
+  "warnings": [],
+  "extraction": {
+    "parser": "markdown",
+    "section_count": 3,
+    "block_count": 3,
+    "characters": 804,
+    "completeness": "structured"
+  }
+}

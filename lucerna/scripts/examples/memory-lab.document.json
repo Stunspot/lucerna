@@ -1,0 +1,168 @@
+{
+  "schema_version": 1,
+  "id": "lesson-memory-instrument",
+  "title": "Memory that keeps its meaning",
+  "source": {
+    "kind": "authored",
+    "format": "markdown",
+    "original": "Original Lucerna companion lesson",
+    "canonical_url": "https://arxiv.org/abs/2607.26637v1",
+    "rights": "Original explanations and diagrams; empirical facts attributed to Zhou et al. (2026), arXiv:2607.26637v1."
+  },
+  "sections": [
+    {
+      "id": "memory-1",
+      "title": "A memory can keep every fact and still lose the answer",
+      "level": 1,
+      "parent_id": null,
+      "blocks": [
+        {
+          "id": "memory-evidence-1",
+          "kind": "paragraph",
+          "text": "Two statements can survive storage while the relation between them disappears. In this invented learner vignette, a general preference for diagrams has a later, exam-only exception that takes effect on April 10. Move the date and change the task. Then remove the effective date, scope or exception relationship one at a time. The bright borders show the applicability implied by those retained fields; the bottom line follows the complete original chronology. This is an inspectable demonstration of the distinction, not a simulation of how an LLM would answer. Appendix D.1 supplies the empirical motivation: in thirteen questions where the verbatim store succeeded and the curated store failed, the decisive fact was still present. The authors traced failures to lost temporal status, affect and narrative connections. Our date-and-context example illustrates part of that problem.",
+          "anchor": {}
+        },
+        {
+          "id": "memory-evidence-1-limits",
+          "kind": "paragraph",
+          "text": "The person, dates, preferences and applicability rules in this scene are original synthetic teaching material, not observations from the paper or a real learner. The controls operate an explicitly authored rule illustration; this does not run an agent, measure memory accuracy, or prove Lucerna's teaching effectiveness. Appendix D.1 studies three PersonaMem 32k conversations and 32 questions; its diagnosis is evidence about those runs, not a universal claim that curation always damages memory. Contextual qualification is not global supersession. This example keeps the diagram preference useful outside exam revision.",
+          "anchor": {}
+        }
+      ]
+    },
+    {
+      "id": "memory-2",
+      "title": "The best memory view depends on who consumes it",
+      "level": 1,
+      "parent_id": null,
+      "blocks": [
+        {
+          "id": "memory-evidence-2",
+          "kind": "paragraph",
+          "text": "Switch between the two execution-agent tiers and compare all five memory variants. With gpt-4.1, the episode log has the highest observed success rate: 87.1%, versus 82.1% for task-specific guidance synthesis. That seven-task paired advantage has p approximately .23, so the reverse ordering is not settled. With gpt-4.1-mini, guidance synthesis reaches 76.4%, versus the log's 66.4%; the fourteen-task paired advantage has p approximately .02. The useful question is whether a particular consumer can turn the supplied experience into the right next action. More curation is not automatically better: the non-GS skills-and-memory variant sits at 55.0% under the weaker executor. Click a bar to inspect what that variant actually supplies.",
+          "anchor": {}
+        },
+        {
+          "id": "memory-evidence-2-limits",
+          "kind": "paragraph",
+          "text": "Values are the reported Table 5 success percentages for 140 ALFWorld tasks under the three-chain protocol, not measurements of Lucerna or human learning. Only the two reported execution tiers are selectable; the visual does not interpolate unmeasured model strengths. The paired significance statements come from the paper's discussion of Episode log versus GS. The stronger-tier reverse ordering remains statistically unsettled. Compare variants within a tier; the paper permits a qualitative consumer contrast across tiers, not a universal causal estimate for switching every deployment's model.",
+          "anchor": {}
+        },
+        {
+          "id": "memory-variants",
+          "kind": "paragraph",
+          "text": "No store: The executor attempts each task without a persistent experience store. Episode log: Earlier task trajectories are appended mechanically, and retrieval supplies complete episode files. Curated skills: A management agent writes procedure files from earlier attempts; the executor receives relevant file contents. Curated skills+mem: The store combines skills with notes and uses stricter relevance and positive-procedure gates. Curated skills+mem (GS): GS means guidance synthesis: retrieval writes advice for the current task from the skills-and-memory store.",
+          "anchor": {}
+        },
+        {
+          "id": "memory-outcomes-table",
+          "kind": "table",
+          "text": "Reported Table 5 task success (%): stronger and weaker execution-agent tiers.",
+          "rows": [
+            [
+              "Memory variant",
+              "gpt-4.1 (%)",
+              "gpt-4.1-mini (%)"
+            ],
+            [
+              "No store",
+              "73.6",
+              "52.9"
+            ],
+            [
+              "Episode log",
+              "87.1",
+              "66.4"
+            ],
+            [
+              "Curated skills",
+              "80.7",
+              "65.7"
+            ],
+            [
+              "Curated skills+mem",
+              "75.7",
+              "55.0"
+            ],
+            [
+              "Curated skills+mem (GS)",
+              "82.1",
+              "76.4"
+            ]
+          ],
+          "anchor": {}
+        }
+      ]
+    },
+    {
+      "id": "memory-3",
+      "title": "Does the useful view repay the work of building it?",
+      "level": 1,
+      "parent_id": null,
+      "blocks": [
+        {
+          "id": "memory-evidence-3",
+          "kind": "paragraph",
+          "text": "The paper measures building, retrieval and execution separately. In the weaker-executor condition, the episode log costs $7.88 to search across the 140 tasks, versus $2.97 for guidance synthesis; GS also incurs a $10.56 build bill. The reported deployment totals, including execution, are $12.54 and $6.07. Change the execution tier, choose whether to count execution, and move the reuse control. The curves are a deliberately simple what-if: pay the reported build bill once, then repeat an unchanged per-batch cost. They are not a measured forecast. Under the weaker tier with execution included, the illustrative crossover is about 1.63 batches; at one batch the build-inclusive GS total is still higher. Cost alone does not settle the choice: the success rates come from the separate reported task experiment, and no future accuracy is assumed by these curves.",
+          "anchor": {}
+        },
+        {
+          "id": "memory-evidence-3-limits",
+          "kind": "paragraph",
+          "text": "All empirical dollar values are Table 16's reported three-chain costs over 140 tasks at the paper's rate card. They are not current price quotes. Curves assume one completed build, a fixed reused store, unchanged rates, no maintenance costs, and constant future per-batch retrieval/execution cost. This extrapolation was not run in the paper. The store actually evolves during the reported task sequence; freezing its average cost and reusing it is a simplifying scenario, not an empirical law of memory growth. Reported deployment totals are used directly. Separately rounded search and execution columns can differ from their rounded sum by a cent. A cheaper scenario does not establish equal quality, greater human learning, or a universal memory architecture winner. No success-rate forecast is used.",
+          "anchor": {}
+        },
+        {
+          "id": "memory-cost-formula",
+          "kind": "equation",
+          "text": "Scenario total cost = one-time build cost + reuse batches × reported cost per 140-task batch.",
+          "latex": "C(N)=B+N\\,c_{\\mathrm{batch}}",
+          "anchor": {}
+        },
+        {
+          "id": "memory-cost-measurements",
+          "kind": "table",
+          "text": "Selected Table 16 reported costs ($) over 140 tasks. Deployment totals can differ by a cent from independently rounded role columns.",
+          "rows": [
+            [
+              "Executor / store",
+              "Build",
+              "Search",
+              "Execution",
+              "Deployment"
+            ],
+            [
+              "gpt-4.1 / Episode log",
+              "0",
+              "6.62",
+              "12.15",
+              "18.77"
+            ],
+            [
+              "gpt-4.1 / GS",
+              "9.66",
+              "3.75",
+              "13.63",
+              "17.38"
+            ],
+            [
+              "gpt-4.1-mini / Episode log",
+              "0",
+              "7.88",
+              "4.67",
+              "12.54"
+            ],
+            [
+              "gpt-4.1-mini / GS",
+              "10.56",
+              "2.97",
+              "3.10",
+              "6.07"
+            ]
+          ],
+          "anchor": {}
+        }
+      ]
+    }
+  ]
+}

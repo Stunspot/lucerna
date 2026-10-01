@@ -1,0 +1,141 @@
+{
+  "schema_version": 1,
+  "id": "lesson-attention-instrument",
+  "title": "Inside attention",
+  "source": {
+    "kind": "authored",
+    "format": "markdown",
+    "original": "Original Lucerna companion lesson",
+    "canonical_url": "https://arxiv.org/abs/1706.03762v7",
+    "rights": "Original explanatory text and diagrams; research attributed"
+  },
+  "sections": [
+    {
+      "id": "attention-1",
+      "title": "Start with the job the machine is doing",
+      "level": 1,
+      "parent_id": null,
+      "blocks": [
+        {
+          "id": "attention-evidence-1",
+          "kind": "paragraph",
+          "text": "Think of the encoder as producing a contextual table: one numeric vector for each input position, updated using the other input positions. The decoder reads that table and the output prefix, then predicts one next symbol. The original paper uses six layers in each stack. Within a layer, attention mixes information between positions; the feed-forward network transforms each position. Residual connections and normalization keep an additional path around each sublayer. Move the output-step control to reveal how the known prefix grows. Play follows one illustrative route through the components.",
+          "anchor": {}
+        },
+        {
+          "id": "attention-evidence-1-limits",
+          "kind": "paragraph",
+          "text": "The token sequence and moving pulse illustrate information flow; this scene does not run a trained Transformer or compute next-token probabilities. Each large block compresses a stack of six layers from the paper. The original implementation also includes learned projections, residual connections, normalization, and output softmax. The decoder sees shifted output embeddings. During training the mask permits parallel processing while withholding each row’s future answers.",
+          "anchor": {}
+        }
+      ]
+    },
+    {
+      "id": "attention-2",
+      "title": "A query is a direction. Attention is a mixture.",
+      "level": 1,
+      "parent_id": null,
+      "blocks": [
+        {
+          "id": "attention-evidence-2",
+          "kind": "paragraph",
+          "text": "A query is a numeric request for relevant information. Each key is compared with it by a dot product; each associated value is the payload available to mix into the answer. In this toy example the query has two components, the three keys are shown explicitly, and the payloads are single numbers. Change either query component and follow the resulting scores, softmax weights and weighted value. Turning on the paper’s square-root scaling divides scores by sqrt(2). Temperature is an extra exploration control: raising it spreads the weights. This makes the operation in softmax(QKᵀ/√dₖ)V tangible without pretending the weights are statements of truth. The moving marker traces the computation from query and keys through scores, normalized weights and the weighted answer.",
+          "anchor": {}
+        },
+        {
+          "id": "attention-evidence-2-limits",
+          "kind": "paragraph",
+          "text": "The displayed keys, values, query and score magnitudes are illustrative, not measured parameters from the paper. The toy key dimension is two. Changing the score-magnitude control multiplies dot products; it does not change dimensionality. Temperature is a demonstration extension, not an extra parameter in the paper’s displayed base equation. Softmax weights are mixing coefficients. A concentrated distribution does not by itself establish understanding or correctness.",
+          "anchor": {}
+        },
+        {
+          "id": "attention-formula",
+          "kind": "equation",
+          "text": "Attention(Q,K,V) = softmax(QK^T / sqrt(d_k)) V",
+          "latex": "\\operatorname{Attention}(Q,K,V)=\\operatorname{softmax}\\!\\left(\\frac{QK^{\\mathsf T}}{\\sqrt{d_k}}\\right)V",
+          "anchor": {}
+        }
+      ]
+    },
+    {
+      "id": "attention-3",
+      "title": "Show exactly what a causal mask prevents",
+      "level": 1,
+      "parent_id": null,
+      "blocks": [
+        {
+          "id": "attention-evidence-3",
+          "kind": "paragraph",
+          "text": "The decoder may process many training positions at once, but each position must only use the allowed prefix. The paper sets forbidden pre-softmax scores to negative infinity. Their exponentials are exactly zero, so forbidden values contribute nothing. Here each label is a shifted decoder input: row 2 can use <start> and The while predicting the next output. Leave row 2 selected and change key 3’s score or payload. With masking enabled the output stays the same. Disable the mask and the future information can change the output. That is the leakage the mask prevents.",
+          "anchor": {}
+        },
+        {
+          "id": "attention-evidence-3-limits",
+          "kind": "paragraph",
+          "text": "The numeric scores and values are illustrative scalar payloads, not a language model’s probabilities or trained states. This implementation uses an exact zero numerator for masked positions, mathematically equivalent to exponentiating a negative-infinity score. Input labels are shifted relative to output targets; the permitted diagonal is not permission to read the answer being predicted.",
+          "anchor": {}
+        }
+      ]
+    },
+    {
+      "id": "attention-4",
+      "title": "Several views can survive the same lookup",
+      "level": 1,
+      "parent_id": null,
+      "blocks": [
+        {
+          "id": "attention-evidence-4",
+          "kind": "paragraph",
+          "text": "One attention head returns one weighted mixture. The paper projects queries, keys and values through different learned matrices and runs attention in parallel. The separate results are concatenated and projected again. In this two-head toy, changing the separation control rotates head B’s query from head A’s direction toward the second key component. Compare the two actual weight distributions. Then change the final projection coefficients and watch how the two payload mixtures combine. The separate value payloads remind us that each head also has its own value projection.",
+          "anchor": {}
+        },
+        {
+          "id": "attention-evidence-4-limits",
+          "kind": "paragraph",
+          "text": "The river/bank/loan numbers are an invented geometric example, not an analysis of named linguistic roles in trained attention heads. The paper uses eight heads with 64-dimensional key/value spaces in its base configuration. This toy shows two heads and scalar output payloads. The adjustable query direction and output coefficients stand in for learned linear projections. They are not trained inside this scene. At zero separation the weighting patterns coincide, while outputs may still differ because the value projections are different.",
+          "anchor": {}
+        }
+      ]
+    },
+    {
+      "id": "attention-5",
+      "title": "Give each position a usable numerical signature",
+      "level": 1,
+      "parent_id": null,
+      "blocks": [
+        {
+          "id": "attention-evidence-5",
+          "kind": "paragraph",
+          "text": "Attention needs information about sequence order. This paper adds a positional vector to each token embedding, using paired sine and cosine waves at several frequencies. A pair is like a clock hand: shifting position rotates it. The scene computes the paper’s formula directly, using a small eight-dimensional example with four frequency pairs. Play moves the active position by the selected offset. The second readout recomputes the same pair as a linear combination of its original sine and cosine values. This is the fixed-offset property the authors discuss. Adding these values to an embedding makes position available to later learned operations; it does not force the model to use position correctly.",
+          "anchor": {}
+        },
+        {
+          "id": "attention-evidence-5-limits",
+          "kind": "paragraph",
+          "text": "This illustration uses d_model=8 so that four frequency pairs can be explored. The paper’s base model uses d_model=512. The two displayed embedding components are invented values, not learned embeddings from the paper. Only one sine/cosine pair is shown at a time; a full positional vector concatenates pairs at different frequencies. The authors motivate possible extrapolation to longer sequences and report similar results with learned positions. The display is not evidence of unlimited length generalization.",
+          "anchor": {}
+        }
+      ]
+    },
+    {
+      "id": "attention-source",
+      "title": "Read the research",
+      "level": 1,
+      "parent_id": null,
+      "blocks": [
+        {
+          "id": "attention-reference",
+          "kind": "paragraph",
+          "text": "Original companion lesson by Nova for Lucerna. Research source: Vaswani et al., Attention Is All You Need (2017), arXiv:1706.03762v7. Open https://arxiv.org/abs/1706.03762v7 for the complete paper. This laboratory uses small numerical examples to explain mechanisms; it does not run a trained Transformer.",
+          "anchor": {
+            "url": "https://arxiv.org/abs/1706.03762v7"
+          }
+        }
+      ]
+    }
+  ],
+  "warnings": [],
+  "extraction": {
+    "scope": "authored"
+  }
+}

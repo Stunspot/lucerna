@@ -1,0 +1,323 @@
+{
+  "schema_version": 1,
+  "title": "Chemical equilibrium is still moving",
+  "overview": "Explore a reversible first-order reaction. Equal forward and reverse rates can coexist with constant concentrations.",
+  "scenes": [
+    {
+      "id": "dynamic-equilibrium",
+      "title": "Same amounts, continuing reactions",
+      "explanation": "A converts to B at rate kf[A], while B converts to A at rate kr[B]. Starting with A, B rises until the two reaction rates match. At equilibrium the amounts stop changing, but both reactions continue. Change either rate constant to move the equilibrium composition; change both proportionally to change the speed without changing that composition.",
+      "narration": "A turns into B, and B turns back into A. Watch the amounts settle. Equilibrium means the opposing reaction rates match. It does not mean the reactions have stopped. Change the forward or reverse rate to see both the destination and the journey.",
+      "alt_text": "Two bars show the conserved fractions of A and B. A curve plots the B fraction over six seconds; readouts show the current fractions, reaction rates, and equilibrium B fraction.",
+      "assumptions": [
+        "Illustrative well-mixed, constant-temperature system with one first-order reversible step A to B.",
+        "Total concentration is 1 arbitrary concentration unit; initially all material is A. Real multistep reactions may not obey this model."
+      ],
+      "duration": 18,
+      "controls": [
+        {
+          "id": "kf",
+          "label": "A to B rate constant (per second)",
+          "type": "range",
+          "min": 0.1,
+          "max": 2,
+          "step": 0.1,
+          "default": 0.7
+        },
+        {
+          "id": "kr",
+          "label": "B to A rate constant (per second)",
+          "type": "range",
+          "min": 0.1,
+          "max": 2,
+          "step": 0.1,
+          "default": 0.3
+        }
+      ],
+      "variables": {
+        "rate_sum": {
+          "op": "add",
+          "args": [
+            {
+              "var": "kf"
+            },
+            {
+              "var": "kr"
+            }
+          ]
+        },
+        "eq_B": {
+          "op": "div",
+          "args": [
+            {
+              "var": "kf"
+            },
+            {
+              "var": "rate_sum"
+            }
+          ]
+        },
+        "elapsed": {
+          "op": "mul",
+          "args": [
+            {
+              "var": "t"
+            },
+            6
+          ]
+        },
+        "B": {
+          "op": "mul",
+          "args": [
+            {
+              "var": "eq_B"
+            },
+            {
+              "op": "sub",
+              "args": [
+                1,
+                {
+                  "op": "exp",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        -1,
+                        {
+                          "var": "rate_sum"
+                        },
+                        {
+                          "var": "elapsed"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "A": {
+          "op": "sub",
+          "args": [
+            1,
+            {
+              "var": "B"
+            }
+          ]
+        },
+        "forward": {
+          "op": "mul",
+          "args": [
+            {
+              "var": "kf"
+            },
+            {
+              "var": "A"
+            }
+          ]
+        },
+        "reverse": {
+          "op": "mul",
+          "args": [
+            {
+              "var": "kr"
+            },
+            {
+              "var": "B"
+            }
+          ]
+        }
+      },
+      "visual": {
+        "width": 800,
+        "height": 450,
+        "objects": [
+          {
+            "id": "heading",
+            "type": "text",
+            "x": 30,
+            "y": 30,
+            "font_size": 20,
+            "text": "A ⇌ B  |  elapsed {{elapsed:1}} seconds",
+            "fill": "#edf2f7"
+          },
+          {
+            "id": "amounts",
+            "type": "bars",
+            "x": 45,
+            "y": 75,
+            "width": 280,
+            "height": 155,
+            "values": [
+              {
+                "var": "A"
+              },
+              {
+                "var": "B"
+              }
+            ],
+            "labels": [
+              "A",
+              "B"
+            ],
+            "max": 1,
+            "fill": "#69d8ba"
+          },
+          {
+            "id": "fraction-readout",
+            "type": "text",
+            "x": 370,
+            "y": 90,
+            "font_size": 18,
+            "text": "A = {{A:3}}    B = {{B:3}}",
+            "fill": "#edf2f7"
+          },
+          {
+            "id": "forward-readout",
+            "type": "text",
+            "x": 370,
+            "y": 130,
+            "font_size": 17,
+            "text": "Forward rate = {{forward:3}}",
+            "fill": "#69d8ba"
+          },
+          {
+            "id": "reverse-readout",
+            "type": "text",
+            "x": 370,
+            "y": 162,
+            "font_size": 17,
+            "text": "Reverse rate = {{reverse:3}}",
+            "fill": "#f3b86d"
+          },
+          {
+            "id": "destination",
+            "type": "text",
+            "x": 370,
+            "y": 210,
+            "font_size": 17,
+            "text": "Equilibrium B = {{eq_B:3}}",
+            "fill": "#b9c7d8"
+          },
+          {
+            "id": "approach",
+            "type": "plot",
+            "x": 60,
+            "y": 270,
+            "width": 660,
+            "height": 125,
+            "x_min": 0,
+            "x_max": 6,
+            "y_min": 0,
+            "y_max": 1,
+            "expr": {
+              "op": "mul",
+              "args": [
+                {
+                  "var": "eq_B"
+                },
+                {
+                  "op": "sub",
+                  "args": [
+                    1,
+                    {
+                      "op": "exp",
+                      "args": [
+                        {
+                          "op": "mul",
+                          "args": [
+                            -1,
+                            {
+                              "var": "rate_sum"
+                            },
+                            {
+                              "var": "x"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "stroke": "#69d8ba",
+            "stroke_width": 3,
+            "samples": 64
+          },
+          {
+            "id": "now",
+            "type": "circle",
+            "cx": {
+              "op": "add",
+              "args": [
+                60,
+                {
+                  "op": "mul",
+                  "args": [
+                    110,
+                    {
+                      "var": "elapsed"
+                    }
+                  ]
+                }
+              ]
+            },
+            "cy": {
+              "op": "sub",
+              "args": [
+                395,
+                {
+                  "op": "mul",
+                  "args": [
+                    125,
+                    {
+                      "var": "B"
+                    }
+                  ]
+                }
+              ]
+            },
+            "r": 6,
+            "fill": "#f3b86d"
+          },
+          {
+            "id": "axis",
+            "type": "text",
+            "x": 60,
+            "y": 428,
+            "font_size": 16,
+            "text": "B fraction over time: 0 to 6 seconds",
+            "fill": "#b9c7d8"
+          }
+        ],
+        "keyframes": []
+      },
+      "steps": [
+        {
+          "time": 0,
+          "title": "Start away from equilibrium",
+          "text": "Initially B is absent. Only the forward reaction contributes appreciably."
+        },
+        {
+          "time": 0.4,
+          "title": "Two opposing rates",
+          "text": "As B accumulates, the reverse rate grows. The net change slows because forward minus reverse becomes smaller."
+        },
+        {
+          "time": 1,
+          "title": "A dynamic balance",
+          "text": "The concentrations approach steady values while both rates approach the same positive value. Now change both constants proportionally."
+        }
+      ],
+      "source_anchors": [
+        {
+          "block_id": "b-2",
+          "relation": "illustrates"
+        }
+      ],
+      "section_id": "s-3"
+    }
+  ]
+}

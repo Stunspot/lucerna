@@ -1,0 +1,4 @@
+interface:
+  display_name: "Lucerna"
+  short_description: "🎓 Explain concepts, explore papers, and guide learning."
+  default_prompt: "Use $lucerna to help me understand this subject, drawing on my learning context and creating an interactive explanation when it helps."
